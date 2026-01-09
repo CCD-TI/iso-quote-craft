@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react';
-import { Eye, Download } from 'lucide-react';
+import { Eye, Download, Save } from 'lucide-react';
 import Layout from '@/components/layout/Layout';
 import ClientDataForm from '@/components/quotation/ClientDataForm';
 import ISOSelectionTable from '@/components/quotation/ISOSelectionTable';
@@ -11,6 +11,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogFooter,
 } from '@/components/ui/dialog';
 import { ClientData, SelectedISO } from '@/types/quotation';
 import { useApp } from '@/context/AppContext';
@@ -98,6 +99,40 @@ const Index = () => {
     setShowPreview(true);
   };
 
+  const saveQuotation = () => {
+    const subtotal = selectedISOs.reduce((sum, sel) => {
+      let total = 0;
+      if (sel.certification) total += sel.certificationPrice;
+      if (sel.followUp) total += sel.followUpPrice;
+      if (sel.recertification) total += sel.recertificationPrice;
+      return sum + total;
+    }, 0);
+
+    const igv = subtotal * 0.18;
+    const totalConIGV = subtotal + igv;
+    const discountAmount = totalConIGV * (discount / 100);
+    const finalTotal = totalConIGV - discountAmount;
+
+    addQuotation({
+      id: Date.now().toString(),
+      code: clientData.codigo,
+      date: new Date().toISOString(),
+      client: clientData,
+      selectedISOs,
+      subtotal,
+      igv,
+      discount,
+      total: finalTotal,
+      status: 'draft',
+    });
+
+    toast({
+      title: 'Cotización guardada',
+      description: 'La cotización se ha guardado en el historial',
+    });
+    setShowPreview(false);
+  };
+
   const handleDownloadPDF = async () => {
     if (!validateForm()) return;
 
@@ -118,32 +153,7 @@ const Index = () => {
         try {
           await html2pdf().set(options).from(previewRef.current).save();
 
-          // Save quotation to history
-          const subtotal = selectedISOs.reduce((sum, sel) => {
-            let total = 0;
-            if (sel.certification) total += sel.certificationPrice;
-            if (sel.followUp) total += sel.followUpPrice;
-            if (sel.recertification) total += sel.recertificationPrice;
-            return sum + total;
-          }, 0);
-
-          const igv = subtotal * 0.18;
-          const totalConIGV = subtotal + igv;
-          const discountAmount = totalConIGV * (discount / 100);
-          const finalTotal = totalConIGV - discountAmount;
-
-          addQuotation({
-            id: Date.now().toString(),
-            code: clientData.codigo,
-            date: new Date().toISOString(),
-            client: clientData,
-            selectedISOs,
-            subtotal,
-            igv,
-            discount,
-            total: finalTotal,
-            status: 'draft',
-          });
+          saveQuotation();
 
           toast({
             title: 'PDF generado',
@@ -201,6 +211,15 @@ const Index = () => {
             selectedISOs={selectedISOs}
             discount={discount}
           />
+          <DialogFooter className="flex gap-2 mt-4">
+            <Button variant="outline" onClick={() => setShowPreview(false)}>
+              Cerrar
+            </Button>
+            <Button onClick={saveQuotation} className="flex items-center gap-2">
+              <Save className="w-4 h-4" />
+              Guardar Cotización
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </Layout>

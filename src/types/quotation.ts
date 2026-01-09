@@ -15,6 +15,15 @@ export interface Advisor {
   phone: string;
 }
 
+export interface BankAccount {
+  id: string;
+  bankName: string;
+  accountHolder: string;
+  accountNumber: string;
+  cci: string;
+  currency: 'soles' | 'dolares';
+}
+
 export interface SelectedISO {
   isoId: string;
   certification: boolean;

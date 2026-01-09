@@ -1,4 +1,15 @@
-import { ISOStandard, Advisor } from '@/types/quotation';
+import { ISOStandard, Advisor, BankAccount } from '@/types/quotation';
+
+export const initialBankAccounts: BankAccount[] = [
+  {
+    id: '1',
+    bankName: 'Interbank',
+    accountHolder: 'CENTRO DE CAPACITACIÓN GUBERNAMENTAL',
+    accountNumber: '200-3007723278',
+    cci: '003-200-003007723278-30',
+    currency: 'soles',
+  },
+];
 
 export const initialISOStandards: ISOStandard[] = [
   {

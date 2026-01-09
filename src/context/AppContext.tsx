@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { ISOStandard, Advisor, Quotation } from '@/types/quotation';
-import { initialISOStandards, initialAdvisors } from '@/data/initialData';
+import { ISOStandard, Advisor, Quotation, BankAccount } from '@/types/quotation';
+import { initialISOStandards, initialAdvisors, initialBankAccounts } from '@/data/initialData';
 
 interface AppContextType {
   isoStandards: ISOStandard[];
@@ -9,6 +9,8 @@ interface AppContextType {
   setAdvisors: React.Dispatch<React.SetStateAction<Advisor[]>>;
   quotations: Quotation[];
   setQuotations: React.Dispatch<React.SetStateAction<Quotation[]>>;
+  bankAccounts: BankAccount[];
+  setBankAccounts: React.Dispatch<React.SetStateAction<BankAccount[]>>;
   addISOStandard: (iso: ISOStandard) => void;
   updateISOStandard: (iso: ISOStandard) => void;
   deleteISOStandard: (id: string) => void;
@@ -17,6 +19,9 @@ interface AppContextType {
   deleteAdvisor: (id: string) => void;
   addQuotation: (quotation: Quotation) => void;
   getNextQuotationCode: (year: number, month: string) => string;
+  addBankAccount: (bank: BankAccount) => void;
+  updateBankAccount: (bank: BankAccount) => void;
+  deleteBankAccount: (id: string) => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -37,6 +42,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return saved ? JSON.parse(saved) : [];
   });
 
+  const [bankAccounts, setBankAccounts] = useState<BankAccount[]>(() => {
+    const saved = localStorage.getItem('bankAccounts');
+    return saved ? JSON.parse(saved) : initialBankAccounts;
+  });
+
   useEffect(() => {
     localStorage.setItem('isoStandards', JSON.stringify(isoStandards));
   }, [isoStandards]);
@@ -48,6 +58,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   useEffect(() => {
     localStorage.setItem('quotations', JSON.stringify(quotations));
   }, [quotations]);
+
+  useEffect(() => {
+    localStorage.setItem('bankAccounts', JSON.stringify(bankAccounts));
+  }, [bankAccounts]);
 
   const addISOStandard = (iso: ISOStandard) => {
     setIsoStandards((prev) => [...prev, iso]);
@@ -90,6 +104,20 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return `${prefix}${nextNumber.toString().padStart(5, '0')}`;
   };
 
+  const addBankAccount = (bank: BankAccount) => {
+    setBankAccounts((prev) => [...prev, bank]);
+  };
+
+  const updateBankAccount = (bank: BankAccount) => {
+    setBankAccounts((prev) =>
+      prev.map((item) => (item.id === bank.id ? bank : item))
+    );
+  };
+
+  const deleteBankAccount = (id: string) => {
+    setBankAccounts((prev) => prev.filter((item) => item.id !== id));
+  };
+
   return (
     <AppContext.Provider
       value={{
@@ -99,6 +127,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         setAdvisors,
         quotations,
         setQuotations,
+        bankAccounts,
+        setBankAccounts,
         addISOStandard,
         updateISOStandard,
         deleteISOStandard,
@@ -107,6 +137,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         deleteAdvisor,
         addQuotation,
         getNextQuotationCode,
+        addBankAccount,
+        updateBankAccount,
+        deleteBankAccount,
       }}
     >
       {children}
