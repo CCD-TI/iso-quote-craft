@@ -75,16 +75,16 @@ const QuotationPreview = forwardRef<HTMLDivElement, QuotationPreviewProps>(
       >
         {/* Watermark Background */}
         <div className="absolute inset-0 z-0 flex items-center justify-center pointer-events-none">
-          <div className="flex items-center gap-8 opacity-25">
+          <div className="flex items-center gap-12 opacity-20">
             <img 
               src={watermarkBg} 
               alt="Watermark" 
-              className="h-48 object-contain"
+              className="w-[45%] max-h-[70%] object-contain"
             />
             <img 
               src={logoCCDWatermark} 
               alt="CCD Logo Watermark" 
-              className="h-40 object-contain"
+              className="w-[35%] max-h-[60%] object-contain"
             />
           </div>
         </div>
