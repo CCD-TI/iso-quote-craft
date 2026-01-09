@@ -74,14 +74,15 @@ const QuotationPreview = forwardRef<HTMLDivElement, QuotationPreviewProps>(
       >
         {/* Watermark Background */}
         <div 
-          className="absolute inset-0 z-0 opacity-30"
-          style={{
-            backgroundImage: `url(${watermarkBg})`,
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-            backgroundRepeat: 'no-repeat',
-          }}
-        />
+          className="absolute inset-0 z-0 flex items-center justify-center pointer-events-none"
+        >
+          <img 
+            src={watermarkBg} 
+            alt="" 
+            className="w-[70%] h-auto opacity-15"
+            style={{ maxWidth: '500px' }}
+          />
+        </div>
 
         {/* Content */}
         <div className="relative z-10 p-8">
