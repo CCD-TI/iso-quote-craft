@@ -74,50 +74,46 @@ const QuotationPreview = forwardRef<HTMLDivElement, QuotationPreviewProps>(
       >
         {/* Watermark Background */}
         <div 
-          className="absolute inset-0 z-0 flex items-center justify-center pointer-events-none"
-        >
-          <img 
-            src={watermarkBg} 
-            alt="" 
-            className="w-[70%] h-auto opacity-15"
-            style={{ maxWidth: '500px' }}
-          />
-        </div>
+          className="absolute inset-0 z-0 opacity-30"
+          style={{
+            backgroundImage: `url(${watermarkBg})`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            backgroundRepeat: 'no-repeat',
+          }}
+        />
 
         {/* Content */}
         <div className="relative z-10 p-8">
-          {/* Header with Logos and Date */}
-          <div className="flex justify-between items-start mb-4">
+          {/* Header with Logos */}
+          <div className="flex justify-between items-start mb-6 pb-4 border-b-2 border-primary">
             {/* Left - Logos */}
-            <div className="flex items-center gap-4">
-              <img src={logoCCD} alt="CCD Logo" className="h-16 object-contain" />
-              <div className="border-l-2 border-primary pl-4 flex flex-col gap-1">
-                <img src={logoIAF} alt="IAF Logo" className="h-7 object-contain" />
-                <img src={logoQRO} alt="QRO Logo" className="h-7 object-contain" />
+            <div className="flex items-center gap-3">
+              <img src={logoCCD} alt="CCD Logo" className="h-14 object-contain" />
+              <div className="border-l-2 border-primary pl-3 flex flex-col gap-1">
+                <img src={logoIAF} alt="IAF Logo" className="h-8 object-contain" />
+                <img src={logoQRO} alt="QRO Logo" className="h-8 object-contain" />
               </div>
             </div>
 
-            {/* Right - Date Info */}
+            {/* Right - Date and Code */}
             <div className="text-right text-sm">
               <p>Día: <span className="font-semibold">{formattedDate}</span></p>
               <p className="text-gold font-semibold">Cotización válida por 48 horas</p>
             </div>
           </div>
 
-          {/* Title - ACUERDO COMERCIAL */}
-          <div className="mb-6">
-            <div className="border-t-2 border-primary pt-2">
-              <h1 className="text-2xl font-bold text-primary text-center tracking-wide">
-                ACUERDO COMERCIAL
-              </h1>
-            </div>
-            <div className="border-b-2 border-primary mt-2"></div>
+          {/* Title */}
+          <div className="text-center mb-6">
+            <h1 className="text-2xl font-bold text-primary border-b-2 border-primary inline-block pb-1">
+              ACUERDO COMERCIAL
+            </h1>
           </div>
 
           {/* Client Reference */}
           <div className="flex justify-between items-center mb-4">
-            <p className="text-sm font-medium">Estimado/a:</p>
-            <p className="font-mono font-bold text-primary">{client.codigo}</p>
+            <p className="text-sm"><span className="text-muted-foreground">Estimado/a:</span></p>
+            <p className="font-mono font-semibold">{client.codigo}</p>
           </div>
 
           {/* Client Info Box */}
