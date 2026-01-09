@@ -85,8 +85,8 @@ const QuotationPreview = forwardRef<HTMLDivElement, QuotationPreviewProps>(
 
         {/* Content */}
         <div className="relative z-10 p-8">
-          {/* Header with Logos */}
-          <div className="flex justify-between items-start mb-4">
+          {/* Header with Logos and Info */}
+          <div className="flex justify-between items-start mb-2">
             {/* Left - Logos side by side */}
             <div className="flex items-center gap-5">
               <img src={logoCCD} alt="CCD Logo" className="h-20 object-contain" />
@@ -94,34 +94,37 @@ const QuotationPreview = forwardRef<HTMLDivElement, QuotationPreviewProps>(
               <img src={logoQRO} alt="QRO Logo" className="h-16 object-contain" />
             </div>
 
-            {/* Right - Date, Validity, Title and Code */}
+            {/* Right - Date, Validity and Title */}
             <div className="text-right text-sm">
               <p>Día: <span className="font-semibold text-primary">{formattedDate}</span></p>
               <p className="text-gold font-semibold">Cotización válida por 48 horas</p>
-              <h1 className="text-xl font-bold text-primary mt-2">
+              <h1 className="text-2xl font-bold text-primary mt-2">
                 ACUERDO COMERCIAL
               </h1>
-              <p className="font-mono font-semibold mt-1">{client.codigo}</p>
             </div>
           </div>
 
-          {/* Divider line with Estimado on left */}
+          {/* Divider line */}
           <div className="border-b-2 border-primary mb-4"></div>
           
-          <p className="text-sm mb-4"><span className="text-muted-foreground">Estimado/a:</span></p>
+          {/* Estimado and Code in same row */}
+          <div className="flex justify-between items-center mb-4">
+            <p className="text-sm"><span className="text-muted-foreground">Estimado/a:</span></p>
+            <p className="font-mono font-bold">{client.codigo}</p>
+          </div>
 
           {/* Client Info Box */}
           <div className="border-2 border-primary rounded-md p-4 mb-6">
             <div className="space-y-2 text-sm">
-              <div className="grid grid-cols-[100px_1fr]">
+              <div className="grid grid-cols-[120px_1fr]">
                 <span className="text-muted-foreground">NOMBRE:</span>
                 <span className="font-bold">{client.representante}</span>
               </div>
-              <div className="grid grid-cols-[100px_1fr]">
+              <div className="grid grid-cols-[120px_1fr]">
                 <span className="text-muted-foreground">R.U.C:</span>
                 <span className="font-bold">{client.ruc}</span>
               </div>
-              <div className="grid grid-cols-[100px_1fr]">
+              <div className="grid grid-cols-[120px_1fr]">
                 <span className="text-muted-foreground">RAZÓN SOCIAL:</span>
                 <span className="font-bold">{client.razonSocial}</span>
               </div>
