@@ -9,7 +9,6 @@ import logoCCD from '@/assets/logo-ccd.jpg';
 import logoIAF from '@/assets/logo-iaf.png';
 import logoQRO from '@/assets/logo-qro.png';
 import watermarkBg from '@/assets/watermark-ccd.jpeg';
-import logoCCDWatermark from '@/assets/logo-ccd-watermark.jpg';
 
 interface QuotationPreviewProps {
   client: ClientData;
@@ -74,20 +73,15 @@ const QuotationPreview = forwardRef<HTMLDivElement, QuotationPreviewProps>(
         style={{ fontFamily: 'Arial, sans-serif' }}
       >
         {/* Watermark Background */}
-        <div className="absolute inset-0 z-0 flex items-center justify-center pointer-events-none">
-          <div className="flex items-center gap-12 opacity-20">
-            <img 
-              src={watermarkBg} 
-              alt="Watermark" 
-              className="w-[45%] max-h-[70%] object-contain"
-            />
-            <img 
-              src={logoCCDWatermark} 
-              alt="CCD Logo Watermark" 
-              className="w-[35%] max-h-[60%] object-contain"
-            />
-          </div>
-        </div>
+        <div 
+          className="absolute inset-0 z-0 opacity-30"
+          style={{
+            backgroundImage: `url(${watermarkBg})`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            backgroundRepeat: 'no-repeat',
+          }}
+        />
 
         {/* Content */}
         <div className="relative z-10 p-8">
