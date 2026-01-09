@@ -103,9 +103,6 @@ const QuotationPreview = forwardRef<HTMLDivElement, QuotationPreviewProps>(
               </h1>
             </div>
           </div>
-
-          {/* Divider line */}
-          <div className="border-b-2 border-primary mb-4"></div>
           
           {/* Estimado and Code in same row */}
           <div className="flex justify-between items-center mb-4">
