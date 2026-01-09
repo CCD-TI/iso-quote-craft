@@ -88,10 +88,10 @@ const QuotationPreview = forwardRef<HTMLDivElement, QuotationPreviewProps>(
           {/* Header with Logos */}
           <div className="flex justify-between items-start mb-6 pb-4 border-b-2 border-primary">
             {/* Left - Logos side by side */}
-            <div className="flex items-center gap-4">
-              <img src={logoCCD} alt="CCD Logo" className="h-14 object-contain" />
-              <img src={logoIAF} alt="IAF Logo" className="h-12 object-contain" />
-              <img src={logoQRO} alt="QRO Logo" className="h-12 object-contain" />
+            <div className="flex items-center gap-5">
+              <img src={logoCCD} alt="CCD Logo" className="h-20 object-contain" />
+              <img src={logoIAF} alt="IAF Logo" className="h-16 object-contain" />
+              <img src={logoQRO} alt="QRO Logo" className="h-16 object-contain" />
             </div>
 
             {/* Right - Date and Code */}
