@@ -174,7 +174,7 @@ const QuotationPreview = forwardRef<HTMLDivElement, QuotationPreviewProps>(
                   <span className="font-semibold text-destructive">- {formatCurrency(discountAmount)}</span>
                 </div>
               )}
-              <div className="flex justify-between py-2 bg-gradient-corporate text-white font-bold">
+              <div className="flex justify-between py-2 bg-primary text-white font-bold">
                 <span className="px-2">TARIFA FINAL</span>
                 <span className="px-2">{formatCurrency(finalTotal)}</span>
               </div>
