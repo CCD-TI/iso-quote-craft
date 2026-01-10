@@ -21,8 +21,11 @@ interface QuotationPreviewProps {
 
 const QuotationPreview = forwardRef<HTMLDivElement, QuotationPreviewProps>(
   ({ client, selectedISOs, discount, moduleColors }, ref) => {
-    const { isoStandards, advisors, bankAccounts, certificationSteps } = useApp();
-    const advisor = advisors.find((a) => a.id === client.asesorId);
+    const { isoStandards, bankAccounts, certificationSteps } = useApp();
+    
+    // Get attached PDF from localStorage
+    const attachedPDF = localStorage.getItem('attachedPDF');
+    const pdfName = localStorage.getItem('attachedPDFName') || 'Documento adjunto';
 
     const today = new Date();
     const formattedDate = today.toLocaleDateString('es-PE', {
@@ -240,12 +243,19 @@ const QuotationPreview = forwardRef<HTMLDivElement, QuotationPreviewProps>(
             </div>
           </div>
 
-          {/* Footer */}
-          <div className="text-center pt-4 border-t border-border">
-            <p className="text-sm">
-              Asesor: <span className="font-semibold" style={{ color: moduleColors.primaryColor }}>{advisor?.name || 'No asignado'}</span>
-            </p>
-          </div>
+          {/* Attached PDF Section */}
+          {attachedPDF && (
+            <div className="mb-6 p-4 bg-white/80 rounded border border-border">
+              <h3 className="font-bold text-sm mb-3" style={{ color: moduleColors.primaryColor }}>
+                DOCUMENTO ADJUNTO: {pdfName}
+              </h3>
+              <iframe
+                src={attachedPDF}
+                className="w-full h-96 border rounded"
+                title="PDF Adjunto"
+              />
+            </div>
+          )}
         </div>
       </div>
     );

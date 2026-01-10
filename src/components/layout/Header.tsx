@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
-import { FileText, Users, Settings, History, Building2, GitBranch, Palette } from 'lucide-react';
+import { FileText, Users, Settings, History, Building2, GitBranch, Palette, Upload } from 'lucide-react';
 import logoCCD from '@/assets/logo-ccd.jpg';
 
 const Header = () => {
@@ -8,6 +8,7 @@ const Header = () => {
   const navItems = [
     { path: '/', label: 'Generador', icon: FileText },
     { path: '/historial', label: 'Historial', icon: History },
+    { path: '/archivos', label: 'Archivos', icon: Upload },
     { path: '/asesores', label: 'Asesores', icon: Users },
     { path: '/normas', label: 'Normas ISO', icon: Settings },
     { path: '/bancos', label: 'Bancos', icon: Building2 },
