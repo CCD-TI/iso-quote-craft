@@ -172,6 +172,14 @@ const Index = () => {
     <Layout>
       <div className="flex justify-end gap-3 mb-6">
         <Button
+          onClick={handlePreview}
+          variant="outline"
+          className="flex items-center gap-2"
+        >
+          <Eye className="w-4 h-4" />
+          Vista Previa
+        </Button>
+        <Button
           onClick={handleDownloadPDF}
           className="flex items-center gap-2 bg-primary hover:bg-primary/90"
         >
