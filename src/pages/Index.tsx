@@ -17,13 +17,19 @@ import { ClientData, SelectedISO } from '@/types/quotation';
 import { useApp } from '@/context/AppContext';
 import { useToast } from '@/hooks/use-toast';
 import { useModuleStyles } from '@/context/ModuleColorsContext';
-import html2pdf from 'html2pdf.js';
+import {
+  downloadPdfArrayBuffer,
+  downloadPdfBytes,
+  generatePdfArrayBufferFromElement,
+  mergePdfArrayBufferWithDataUrl,
+} from '@/utils/pdfReport';
 
 const Index = () => {
   const { getNextQuotationCode, addQuotation } = useApp();
   const { toast } = useToast();
   const styles = useModuleStyles('generador');
   const previewRef = useRef<HTMLDivElement>(null);
+  const downloadRef = useRef<HTMLDivElement>(null);
   const [showPreview, setShowPreview] = useState(false);
 
   const currentDate = new Date();
@@ -136,38 +142,57 @@ const Index = () => {
   const handleDownloadPDF = async () => {
     if (!validateForm()) return;
 
-    // Show preview first to ensure ref is populated
+    // Keep the existing behavior: open preview while generating
     setShowPreview(true);
 
-    // Wait for dialog to render
+    // Wait a moment for any UI updates
     setTimeout(async () => {
-      if (previewRef.current) {
-        const options = {
-          margin: [10, 10, 10, 10] as [number, number, number, number],
-          filename: `${clientData.codigo}.pdf`,
-          image: { type: 'jpeg' as const, quality: 0.98 },
-          html2canvas: { scale: 2, useCORS: true },
-          jsPDF: { unit: 'mm' as const, format: 'a4' as const, orientation: 'portrait' as const },
-        };
-
-        try {
-          await html2pdf().set(options).from(previewRef.current).save();
-
-          saveQuotation();
-
-          toast({
-            title: 'PDF generado',
-            description: 'La cotización se ha descargado correctamente',
-          });
-        } catch (error) {
-          toast({
-            title: 'Error',
-            description: 'No se pudo generar el PDF',
-            variant: 'destructive',
-          });
-        }
+      const el = downloadRef.current;
+      if (!el) {
+        toast({
+          title: 'Error',
+          description: 'No se pudo preparar el documento para descarga',
+          variant: 'destructive',
+        });
+        return;
       }
-    }, 500);
+
+      const filename = `${clientData.codigo}.pdf`;
+      const options = {
+        margin: [10, 10, 10, 10] as [number, number, number, number],
+        image: { type: 'jpeg' as const, quality: 0.98 },
+        html2canvas: { scale: 2, useCORS: true },
+        jsPDF: { unit: 'mm' as const, format: 'a4' as const, orientation: 'portrait' as const },
+      };
+
+      try {
+        // 1) Generate the quotation PDF from HTML
+        const quotationPdf = await generatePdfArrayBufferFromElement(el, options);
+
+        // 2) If there's an uploaded PDF, merge it as extra pages
+        const attachedPdfDataUrl = localStorage.getItem('attachedPDF');
+        if (attachedPdfDataUrl) {
+          const mergedBytes = await mergePdfArrayBufferWithDataUrl(quotationPdf, attachedPdfDataUrl);
+          downloadPdfBytes(mergedBytes, filename);
+        } else {
+          downloadPdfArrayBuffer(quotationPdf, filename);
+        }
+
+        saveQuotation();
+        setShowPreview(false);
+
+        toast({
+          title: 'PDF generado',
+          description: 'La cotización se ha descargado correctamente',
+        });
+      } catch (error) {
+        toast({
+          title: 'Error',
+          description: 'No se pudo generar el PDF',
+          variant: 'destructive',
+        });
+      }
+    }, 300);
   };
 
   return (
@@ -236,6 +261,18 @@ const Index = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Hidden render used only for PDF generation (without embedded PDF area) */}
+      <div className="fixed left-[-10000px] top-0 w-[210mm]">
+        <QuotationPreview
+          ref={downloadRef}
+          client={clientData}
+          selectedISOs={selectedISOs}
+          discount={discount}
+          moduleColors={styles.colors}
+          showAttachment={false}
+        />
+      </div>
     </Layout>
   );
 };

@@ -24,7 +24,12 @@ import {
 import QuotationPreview from '@/components/quotation/QuotationPreview';
 import { Quotation } from '@/types/quotation';
 import { useToast } from '@/hooks/use-toast';
-import html2pdf from 'html2pdf.js';
+import {
+  downloadPdfArrayBuffer,
+  downloadPdfBytes,
+  generatePdfArrayBufferFromElement,
+  mergePdfArrayBufferWithDataUrl,
+} from '@/utils/pdfReport';
 
 const Historial = () => {
   const { quotations, setQuotations } = useApp();
@@ -70,31 +75,41 @@ const Historial = () => {
     if (!downloadQuotation) return;
 
     const timer = setTimeout(async () => {
-      if (downloadRef.current) {
-        const options = {
-          margin: [10, 10, 10, 10] as [number, number, number, number],
-          filename: `${downloadQuotation.code}.pdf`,
-          image: { type: 'jpeg' as const, quality: 0.98 },
-          html2canvas: { scale: 2, useCORS: true },
-          jsPDF: { unit: 'mm' as const, format: 'a4' as const, orientation: 'portrait' as const },
-        };
+      if (!downloadRef.current) return;
 
-        try {
-          await html2pdf().set(options).from(downloadRef.current).save();
-          toast({
-            title: 'PDF generado',
-            description: 'La cotización se ha descargado correctamente',
-          });
-        } catch (error) {
-          toast({
-            title: 'Error',
-            description: 'No se pudo generar el PDF',
-            variant: 'destructive',
-          });
+      const options = {
+        margin: [10, 10, 10, 10] as [number, number, number, number],
+        image: { type: 'jpeg' as const, quality: 0.98 },
+        html2canvas: { scale: 2, useCORS: true },
+        jsPDF: { unit: 'mm' as const, format: 'a4' as const, orientation: 'portrait' as const },
+      };
+
+      try {
+        const filename = `${downloadQuotation.code}.pdf`;
+        const quotationPdf = await generatePdfArrayBufferFromElement(downloadRef.current, options);
+
+        const attachedPdfDataUrl = localStorage.getItem('attachedPDF');
+        if (attachedPdfDataUrl) {
+          const mergedBytes = await mergePdfArrayBufferWithDataUrl(quotationPdf, attachedPdfDataUrl);
+          downloadPdfBytes(mergedBytes, filename);
+        } else {
+          downloadPdfArrayBuffer(quotationPdf, filename);
         }
-        setDownloadQuotation(null);
+
+        toast({
+          title: 'PDF generado',
+          description: 'La cotización se ha descargado correctamente',
+        });
+      } catch (error) {
+        toast({
+          title: 'Error',
+          description: 'No se pudo generar el PDF',
+          variant: 'destructive',
+        });
       }
-    }, 500);
+
+      setDownloadQuotation(null);
+    }, 300);
 
     return () => clearTimeout(timer);
   }, [downloadQuotation, toast]);
@@ -250,6 +265,7 @@ const Historial = () => {
               selectedISOs={downloadQuotation.selectedISOs}
               discount={downloadQuotation.discount}
               moduleColors={styles.colors}
+              showAttachment={false}
             />
           )}
         </DialogContent>

@@ -17,15 +17,20 @@ interface QuotationPreviewProps {
   selectedISOs: SelectedISO[];
   discount: number;
   moduleColors: ModuleColors;
+  /**
+   * Solo para vista en pantalla. Para descargar el PDF final (unido) se recomienda ocultarlo.
+   */
+  showAttachment?: boolean;
 }
 
 const QuotationPreview = forwardRef<HTMLDivElement, QuotationPreviewProps>(
-  ({ client, selectedISOs, discount, moduleColors }, ref) => {
+  ({ client, selectedISOs, discount, moduleColors, showAttachment = true }, ref) => {
     const { isoStandards, bankAccounts, certificationSteps } = useApp();
-    
-    // Get attached PDF from localStorage
+
+    // Get attached PDF + custom background image from localStorage
     const attachedPDF = localStorage.getItem('attachedPDF');
     const pdfName = localStorage.getItem('attachedPDFName') || 'Documento adjunto';
+    const reportImage = localStorage.getItem('reportImage');
 
     const today = new Date();
     const formattedDate = today.toLocaleDateString('es-PE', {
@@ -77,7 +82,7 @@ const QuotationPreview = forwardRef<HTMLDivElement, QuotationPreviewProps>(
         <div 
           className="absolute inset-0 z-0 opacity-30"
           style={{
-            backgroundImage: `url(${watermarkBg})`,
+            backgroundImage: `url(${reportImage || watermarkBg})`,
             backgroundSize: 'cover',
             backgroundPosition: 'center',
             backgroundRepeat: 'no-repeat',
@@ -243,8 +248,8 @@ const QuotationPreview = forwardRef<HTMLDivElement, QuotationPreviewProps>(
             </div>
           </div>
 
-          {/* Attached PDF Section */}
-          {attachedPDF && (
+          {/* Attached PDF Section (solo vista en pantalla) */}
+          {showAttachment && attachedPDF && (
             <div className="mb-6 p-4 bg-white/80 rounded border border-border">
               <h3 className="font-bold text-sm mb-3" style={{ color: moduleColors.primaryColor }}>
                 DOCUMENTO ADJUNTO: {pdfName}
@@ -255,7 +260,6 @@ const QuotationPreview = forwardRef<HTMLDivElement, QuotationPreviewProps>(
                   type="application/pdf"
                   className="w-full h-96"
                 >
-                  {/* Fallback for browsers that don't support object */}
                   <embed
                     src={attachedPDF}
                     type="application/pdf"
@@ -270,7 +274,7 @@ const QuotationPreview = forwardRef<HTMLDivElement, QuotationPreviewProps>(
                   className="inline-flex items-center gap-2 px-4 py-2 rounded text-white text-sm font-medium hover:opacity-90 transition-opacity"
                   style={{ backgroundColor: moduleColors.primaryColor }}
                 >
-                  📥 Descargar PDF
+                  Descargar PDF adjunto
                 </a>
               </div>
             </div>
