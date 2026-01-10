@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Eye, Trash2, Search, FileText } from 'lucide-react';
+import { useState, useRef, useEffect } from 'react';
+import { Eye, Trash2, Search, FileText, Download } from 'lucide-react';
 import Layout from '@/components/layout/Layout';
 import { useApp } from '@/context/AppContext';
 import { Button } from '@/components/ui/button';
@@ -23,6 +23,7 @@ import {
 import QuotationPreview from '@/components/quotation/QuotationPreview';
 import { Quotation } from '@/types/quotation';
 import { useToast } from '@/hooks/use-toast';
+import html2pdf from 'html2pdf.js';
 
 const Historial = () => {
   const { quotations, setQuotations } = useApp();
@@ -30,6 +31,8 @@ const Historial = () => {
   const [search, setSearch] = useState('');
   const [selectedQuotation, setSelectedQuotation] = useState<Quotation | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [downloadQuotation, setDownloadQuotation] = useState<Quotation | null>(null);
+  const downloadRef = useRef<HTMLDivElement>(null);
 
   const filteredQuotations = quotations.filter(
     (q) =>
@@ -60,6 +63,40 @@ const Historial = () => {
       setDeleteId(null);
     }
   };
+
+  // Handle PDF download when dialog is open and ref is ready
+  useEffect(() => {
+    if (!downloadQuotation) return;
+
+    const timer = setTimeout(async () => {
+      if (downloadRef.current) {
+        const options = {
+          margin: [10, 10, 10, 10] as [number, number, number, number],
+          filename: `${downloadQuotation.code}.pdf`,
+          image: { type: 'jpeg' as const, quality: 0.98 },
+          html2canvas: { scale: 2, useCORS: true },
+          jsPDF: { unit: 'mm' as const, format: 'a4' as const, orientation: 'portrait' as const },
+        };
+
+        try {
+          await html2pdf().set(options).from(downloadRef.current).save();
+          toast({
+            title: 'PDF generado',
+            description: 'La cotización se ha descargado correctamente',
+          });
+        } catch (error) {
+          toast({
+            title: 'Error',
+            description: 'No se pudo generar el PDF',
+            variant: 'destructive',
+          });
+        }
+        setDownloadQuotation(null);
+      }
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [downloadQuotation, toast]);
 
   const getStatusBadge = (status: string) => {
     const styles: Record<string, string> = {
@@ -151,14 +188,25 @@ const Historial = () => {
                           variant="ghost"
                           size="sm"
                           onClick={() => setSelectedQuotation(quotation)}
+                          title="Ver cotización"
                         >
                           <Eye className="w-4 h-4" />
                         </Button>
                         <Button
                           variant="ghost"
                           size="sm"
+                          onClick={() => setDownloadQuotation(quotation)}
+                          title="Descargar PDF"
+                          className="text-primary hover:text-primary"
+                        >
+                          <Download className="w-4 h-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
                           onClick={() => setDeleteId(quotation.id)}
                           className="text-destructive hover:text-destructive"
+                          title="Eliminar"
                         >
                           <Trash2 className="w-4 h-4" />
                         </Button>
@@ -182,6 +230,23 @@ const Historial = () => {
               client={selectedQuotation.client}
               selectedISOs={selectedQuotation.selectedISOs}
               discount={selectedQuotation.discount}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Hidden dialog for PDF download */}
+      <Dialog open={!!downloadQuotation} onOpenChange={() => setDownloadQuotation(null)}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Descargando PDF...</DialogTitle>
+          </DialogHeader>
+          {downloadQuotation && (
+            <QuotationPreview
+              ref={downloadRef}
+              client={downloadQuotation.client}
+              selectedISOs={downloadQuotation.selectedISOs}
+              discount={downloadQuotation.discount}
             />
           )}
         </DialogContent>
