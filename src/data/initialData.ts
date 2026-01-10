@@ -1,5 +1,13 @@
-import { ISOStandard, Advisor, BankAccount } from '@/types/quotation';
+import { ISOStandard, Advisor, BankAccount, CertificationStep } from '@/types/quotation';
 
+export const initialCertificationSteps: CertificationStep[] = [
+  { id: '1', order: 1, title: 'Solicitud de la certificación' },
+  { id: '2', order: 2, title: 'Cotización de servicio' },
+  { id: '3', order: 3, title: 'Transferencia Bancaria' },
+  { id: '4', order: 4, title: 'Recepción de los requisitos' },
+  { id: '5', order: 5, title: 'Gestión de la certificación' },
+  { id: '6', order: 6, title: 'Emisión del certificado ISO' },
+];
 export const initialBankAccounts: BankAccount[] = [
   {
     id: '1',

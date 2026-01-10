@@ -2,7 +2,7 @@ import { forwardRef } from 'react';
 import { useApp } from '@/context/AppContext';
 import { ClientData, SelectedISO } from '@/types/quotation';
 import { numeroALetras } from '@/utils/numberToWords';
-import { FileText, Send, Award, FileCheck, CreditCard, CheckCircle2 } from 'lucide-react';
+import { CheckCircle2 } from 'lucide-react';
 
 // Import logos
 import logoCCD from '@/assets/logo-ccd.jpg';
@@ -18,7 +18,7 @@ interface QuotationPreviewProps {
 
 const QuotationPreview = forwardRef<HTMLDivElement, QuotationPreviewProps>(
   ({ client, selectedISOs, discount }, ref) => {
-    const { isoStandards, advisors, bankAccounts } = useApp();
+    const { isoStandards, advisors, bankAccounts, certificationSteps } = useApp();
     const advisor = advisors.find((a) => a.id === client.asesorId);
 
     const today = new Date();
@@ -56,15 +56,6 @@ const QuotationPreview = forwardRef<HTMLDivElement, QuotationPreviewProps>(
     const formatCurrency = (amount: number) => {
       return `S/ ${amount.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
     };
-
-    const certificationSteps = [
-      { num: 1, title: 'Cotización de servicio', icon: FileText },
-      { num: 2, title: 'Recepción de requisitos', icon: Send },
-      { num: 3, title: 'Emisión del certificado', icon: Award },
-      { num: 4, title: 'Solicitud de certificación', icon: FileCheck },
-      { num: 5, title: 'Transferencia Bancaria', icon: CreditCard },
-      { num: 6, title: 'Gestión de la certificación', icon: CheckCircle2 },
-    ];
 
     return (
       <div 
@@ -202,19 +193,16 @@ const QuotationPreview = forwardRef<HTMLDivElement, QuotationPreviewProps>(
           {/* Certification Flow */}
           <div className="mb-6">
             <h3 className="font-bold text-sm mb-3 text-primary">FLUJO DE CERTIFICACIÓN</h3>
-            <div className="grid grid-cols-6 gap-2">
-              {certificationSteps.map((step) => {
-                const Icon = step.icon;
-                return (
-                  <div key={step.num} className="flex flex-col items-center text-center">
-                    <div className="w-8 h-8 rounded-full bg-gradient-corporate text-white flex items-center justify-center text-sm font-bold mb-1 shadow-md">
-                      {step.num}
-                    </div>
-                    <Icon className="w-5 h-5 text-turquoise mb-1" />
-                    <span className="text-[10px] leading-tight">{step.title}</span>
+            <div className="flex flex-wrap justify-center gap-2">
+              {certificationSteps.map((step) => (
+                <div key={step.id} className="flex flex-col items-center text-center" style={{ width: '80px' }}>
+                  <div className="w-8 h-8 rounded-full bg-gradient-corporate text-white flex items-center justify-center text-sm font-bold mb-1 shadow-md">
+                    {step.order}
                   </div>
-                );
-              })}
+                  <CheckCircle2 className="w-5 h-5 text-primary mb-1" />
+                  <span className="text-[10px] leading-tight">{step.title}</span>
+                </div>
+              ))}
             </div>
           </div>
 

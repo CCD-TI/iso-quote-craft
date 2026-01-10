@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { ISOStandard, Advisor, Quotation, BankAccount } from '@/types/quotation';
-import { initialISOStandards, initialAdvisors, initialBankAccounts } from '@/data/initialData';
+import { ISOStandard, Advisor, Quotation, BankAccount, CertificationStep } from '@/types/quotation';
+import { initialISOStandards, initialAdvisors, initialBankAccounts, initialCertificationSteps } from '@/data/initialData';
 
 interface AppContextType {
   isoStandards: ISOStandard[];
@@ -11,6 +11,8 @@ interface AppContextType {
   setQuotations: React.Dispatch<React.SetStateAction<Quotation[]>>;
   bankAccounts: BankAccount[];
   setBankAccounts: React.Dispatch<React.SetStateAction<BankAccount[]>>;
+  certificationSteps: CertificationStep[];
+  setCertificationSteps: React.Dispatch<React.SetStateAction<CertificationStep[]>>;
   addISOStandard: (iso: ISOStandard) => void;
   updateISOStandard: (iso: ISOStandard) => void;
   deleteISOStandard: (id: string) => void;
@@ -22,6 +24,10 @@ interface AppContextType {
   addBankAccount: (bank: BankAccount) => void;
   updateBankAccount: (bank: BankAccount) => void;
   deleteBankAccount: (id: string) => void;
+  addCertificationStep: (step: CertificationStep) => void;
+  updateCertificationStep: (step: CertificationStep) => void;
+  deleteCertificationStep: (id: string) => void;
+  reorderCertificationSteps: (steps: CertificationStep[]) => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -47,6 +53,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return saved ? JSON.parse(saved) : initialBankAccounts;
   });
 
+  const [certificationSteps, setCertificationSteps] = useState<CertificationStep[]>(() => {
+    const saved = localStorage.getItem('certificationSteps');
+    return saved ? JSON.parse(saved) : initialCertificationSteps;
+  });
+
   useEffect(() => {
     localStorage.setItem('isoStandards', JSON.stringify(isoStandards));
   }, [isoStandards]);
@@ -62,6 +73,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   useEffect(() => {
     localStorage.setItem('bankAccounts', JSON.stringify(bankAccounts));
   }, [bankAccounts]);
+
+  useEffect(() => {
+    localStorage.setItem('certificationSteps', JSON.stringify(certificationSteps));
+  }, [certificationSteps]);
 
   const addISOStandard = (iso: ISOStandard) => {
     setIsoStandards((prev) => [...prev, iso]);
@@ -118,6 +133,28 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setBankAccounts((prev) => prev.filter((item) => item.id !== id));
   };
 
+  const addCertificationStep = (step: CertificationStep) => {
+    setCertificationSteps((prev) => [...prev, step]);
+  };
+
+  const updateCertificationStep = (step: CertificationStep) => {
+    setCertificationSteps((prev) =>
+      prev.map((item) => (item.id === step.id ? step : item))
+    );
+  };
+
+  const deleteCertificationStep = (id: string) => {
+    setCertificationSteps((prev) => {
+      const filtered = prev.filter((item) => item.id !== id);
+      // Reorder after deletion
+      return filtered.map((step, index) => ({ ...step, order: index + 1 }));
+    });
+  };
+
+  const reorderCertificationSteps = (steps: CertificationStep[]) => {
+    setCertificationSteps(steps);
+  };
+
   return (
     <AppContext.Provider
       value={{
@@ -129,6 +166,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         setQuotations,
         bankAccounts,
         setBankAccounts,
+        certificationSteps,
+        setCertificationSteps,
         addISOStandard,
         updateISOStandard,
         deleteISOStandard,
@@ -140,6 +179,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         addBankAccount,
         updateBankAccount,
         deleteBankAccount,
+        addCertificationStep,
+        updateCertificationStep,
+        deleteCertificationStep,
+        reorderCertificationSteps,
       }}
     >
       {children}
