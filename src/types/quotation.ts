@@ -22,6 +22,7 @@ export interface BankAccount {
   accountNumber: string;
   cci: string;
   currency: 'soles' | 'dolares';
+  logo?: string;
 }
 
 export interface SelectedISO {

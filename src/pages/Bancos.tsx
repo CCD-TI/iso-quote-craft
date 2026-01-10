@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Plus, Pencil, Trash2, Building2 } from 'lucide-react';
+import { useState, useRef } from 'react';
+import { Plus, Pencil, Trash2, Building2, Upload, X } from 'lucide-react';
 import Layout from '@/components/layout/Layout';
 import { useApp } from '@/context/AppContext';
 import { Button } from '@/components/ui/button';
@@ -37,6 +37,7 @@ const Bancos = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingBank, setEditingBank] = useState<BankAccount | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [formData, setFormData] = useState({
     bankName: '',
@@ -44,6 +45,7 @@ const Bancos = () => {
     accountNumber: '',
     cci: '',
     currency: 'soles' as 'soles' | 'dolares',
+    logo: '' as string,
   });
 
   const resetForm = () => {
@@ -53,8 +55,35 @@ const Bancos = () => {
       accountNumber: '',
       cci: '',
       currency: 'soles',
+      logo: '',
     });
     setEditingBank(null);
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 2 * 1024 * 1024) {
+        toast({
+          title: 'Error',
+          description: 'El archivo es muy grande. Máximo 2MB.',
+          variant: 'destructive',
+        });
+        return;
+      }
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setFormData({ ...formData, logo: reader.result as string });
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const removeLogo = () => {
+    setFormData({ ...formData, logo: '' });
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
   };
 
   const openCreateDialog = () => {
@@ -70,6 +99,7 @@ const Bancos = () => {
       accountNumber: bank.accountNumber,
       cci: bank.cci,
       currency: bank.currency,
+      logo: bank.logo || '',
     });
     setIsDialogOpen(true);
   };
@@ -147,10 +177,14 @@ const Bancos = () => {
                 key={bank.id}
                 className="bg-muted/30 rounded-lg p-4 border border-border hover:border-primary/30 transition-colors"
               >
-                <div className="flex justify-between items-start mb-3">
-                  <div className="w-10 h-10 rounded-full bg-primary text-primary-foreground flex items-center justify-center">
-                    <Building2 className="w-5 h-5" />
-                  </div>
+              <div className="flex justify-between items-start mb-3">
+                  {bank.logo ? (
+                    <img src={bank.logo} alt={bank.bankName} className="w-10 h-10 object-contain rounded" />
+                  ) : (
+                    <div className="w-10 h-10 rounded-full bg-primary text-primary-foreground flex items-center justify-center">
+                      <Building2 className="w-5 h-5" />
+                    </div>
+                  )}
                   <div className="flex gap-1">
                     <Button
                       variant="ghost"
@@ -239,6 +273,41 @@ const Bancos = () => {
                 onChange={(e) => setFormData({ ...formData, cci: e.target.value })}
                 placeholder="003-200-003007723278-30"
               />
+            </div>
+            <div>
+              <label className="form-label">Logo del Banco</label>
+              <div className="flex items-center gap-3">
+                {formData.logo ? (
+                  <div className="relative">
+                    <img src={formData.logo} alt="Logo" className="w-16 h-16 object-contain border rounded" />
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      size="icon"
+                      className="absolute -top-2 -right-2 w-6 h-6"
+                      onClick={removeLogo}
+                    >
+                      <X className="w-3 h-3" />
+                    </Button>
+                  </div>
+                ) : (
+                  <div
+                    onClick={() => fileInputRef.current?.click()}
+                    className="w-16 h-16 border-2 border-dashed rounded flex flex-col items-center justify-center cursor-pointer hover:border-primary transition-colors"
+                  >
+                    <Upload className="w-5 h-5 text-muted-foreground" />
+                    <span className="text-xs text-muted-foreground">Subir</span>
+                  </div>
+                )}
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleFileChange}
+                  className="hidden"
+                />
+                <p className="text-xs text-muted-foreground">PNG, JPG. Máx 2MB</p>
+              </div>
             </div>
           </div>
           <DialogFooter>

@@ -207,7 +207,9 @@ const QuotationPreview = forwardRef<HTMLDivElement, QuotationPreviewProps>(
             <div className="space-y-3">
               {bankAccounts.map((bank) => (
                 <div key={bank.id} className="flex items-start gap-3">
-                  {bank.bankName.toLowerCase().includes('interbank') ? (
+                  {bank.logo ? (
+                    <img src={bank.logo} alt={bank.bankName} className="h-8 object-contain" />
+                  ) : bank.bankName.toLowerCase().includes('interbank') ? (
                     <img src={logoInterbank} alt="Interbank" className="h-8 object-contain" />
                   ) : (
                     <div className="w-8 h-8 bg-primary text-primary-foreground rounded flex items-center justify-center text-xs font-bold">
