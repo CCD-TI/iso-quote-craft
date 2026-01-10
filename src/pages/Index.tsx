@@ -174,14 +174,6 @@ const Index = () => {
     <Layout>
       <div className="flex justify-end gap-3 mb-6">
         <Button
-          variant="outline"
-          onClick={handlePreview}
-          className="flex items-center gap-2"
-        >
-          <Eye className="w-4 h-4" />
-          Vista Previa
-        </Button>
-        <Button
           onClick={handleDownloadPDF}
           className="flex items-center gap-2 bg-primary hover:bg-primary/90"
         >
@@ -198,6 +190,17 @@ const Index = () => {
           discount={discount}
           onDiscountChange={setDiscount}
         />
+        
+        {/* Preview Button at the bottom */}
+        <div className="flex justify-center pt-4">
+          <Button
+            onClick={handlePreview}
+            className="flex items-center gap-2 bg-gradient-corporate hover:opacity-90 text-white px-8 py-3 text-lg shadow-lg"
+          >
+            <Eye className="w-5 h-5" />
+            Vista Previa
+          </Button>
+        </div>
       </div>
 
       <Dialog open={showPreview} onOpenChange={setShowPreview}>

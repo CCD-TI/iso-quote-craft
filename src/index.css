@@ -44,6 +44,11 @@
     --gold-light: 42 70% 70%;
     --success: 142 76% 36%;
     --warning: 38 92% 50%;
+    
+    /* New gradient colors - Blue to Turquoise */
+    --gradient-start: 210 100% 50%;
+    --gradient-end: 175 100% 45%;
+    --turquoise: 175 100% 45%;
   }
 }
 
@@ -64,11 +69,16 @@
 
 @layer components {
   .section-title {
-    @apply flex items-center gap-3 text-lg font-semibold text-primary mb-4;
+    @apply flex items-center gap-3 text-lg font-semibold mb-4;
+    background: linear-gradient(135deg, hsl(var(--gradient-start)), hsl(var(--gradient-end)));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
   }
 
   .section-number {
-    @apply w-7 h-7 rounded-full bg-accent text-primary flex items-center justify-center text-sm font-bold;
+    @apply w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold text-white shadow-md;
+    background: linear-gradient(135deg, hsl(var(--gradient-start)), hsl(var(--gradient-end)));
   }
 
   .form-label {
@@ -120,5 +130,20 @@
 
   .border-gold {
     border-color: hsl(var(--gold));
+  }
+  
+  .text-gradient {
+    background: linear-gradient(135deg, hsl(var(--gradient-start)), hsl(var(--gradient-end)));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  
+  .bg-gradient-corporate {
+    background: linear-gradient(135deg, hsl(var(--gradient-start)), hsl(var(--gradient-end)));
+  }
+  
+  .text-turquoise {
+    color: hsl(var(--turquoise));
   }
 }

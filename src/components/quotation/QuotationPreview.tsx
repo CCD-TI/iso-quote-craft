@@ -97,7 +97,7 @@ const QuotationPreview = forwardRef<HTMLDivElement, QuotationPreviewProps>(
             {/* Right - Date, Validity and Title */}
             <div className="text-right text-sm">
               <p>Día: <span className="font-semibold text-primary">{formattedDate}</span></p>
-              <p className="text-gold font-semibold">Cotización válida por 48 horas</p>
+              <p className="font-semibold text-turquoise">Cotización válida por 48 horas</p>
               <h1 className="text-2xl font-bold text-primary mt-2">
                 ACUERDO COMERCIAL
               </h1>
@@ -189,7 +189,7 @@ const QuotationPreview = forwardRef<HTMLDivElement, QuotationPreviewProps>(
                   <span className="font-semibold text-destructive">- {formatCurrency(discountAmount)}</span>
                 </div>
               )}
-              <div className="flex justify-between py-2 bg-gold text-primary font-bold">
+              <div className="flex justify-between py-2 bg-gradient-corporate text-white font-bold">
                 <span className="px-2">TARIFA FINAL</span>
                 <span className="px-2">{formatCurrency(finalTotal)}</span>
               </div>
@@ -207,10 +207,10 @@ const QuotationPreview = forwardRef<HTMLDivElement, QuotationPreviewProps>(
                 const Icon = step.icon;
                 return (
                   <div key={step.num} className="flex flex-col items-center text-center">
-                    <div className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-bold mb-1">
+                    <div className="w-8 h-8 rounded-full bg-gradient-corporate text-white flex items-center justify-center text-sm font-bold mb-1 shadow-md">
                       {step.num}
                     </div>
-                    <Icon className="w-5 h-5 text-gold mb-1" />
+                    <Icon className="w-5 h-5 text-turquoise mb-1" />
                     <span className="text-[10px] leading-tight">{step.title}</span>
                   </div>
                 );
