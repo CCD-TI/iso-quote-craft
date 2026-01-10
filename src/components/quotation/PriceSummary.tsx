@@ -129,7 +129,7 @@ const PriceSummary = ({ selectedISOs, discount, onDiscountChange }: PriceSummary
               - {formatCurrency(discountAmount)}
             </span>
           </div>
-          <div className="flex justify-between items-center py-3 px-4 bg-primary text-primary-foreground rounded-md">
+          <div className="flex justify-between items-center py-3 px-4 bg-gradient-corporate text-white rounded-md">
             <span className="font-bold text-lg">PRECIO FINAL</span>
             <span className="font-bold text-xl">{formatCurrency(finalTotal)}</span>
           </div>
