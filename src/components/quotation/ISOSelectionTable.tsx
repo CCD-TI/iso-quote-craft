@@ -1,14 +1,16 @@
 import { useApp } from '@/context/AppContext';
 import { SelectedISO } from '@/types/quotation';
+import { ModuleColors } from '@/context/ModuleColorsContext';
 import { Checkbox } from '@/components/ui/checkbox';
 import { X } from 'lucide-react';
 
 interface ISOSelectionTableProps {
   selectedISOs: SelectedISO[];
   onChange: (selectedISOs: SelectedISO[]) => void;
+  moduleColors: ModuleColors;
 }
 
-const ISOSelectionTable = ({ selectedISOs, onChange }: ISOSelectionTableProps) => {
+const ISOSelectionTable = ({ selectedISOs, onChange, moduleColors }: ISOSelectionTableProps) => {
   const { isoStandards } = useApp();
 
   const getSelectedISO = (isoId: string): SelectedISO => {
@@ -82,23 +84,43 @@ const ISOSelectionTable = ({ selectedISOs, onChange }: ISOSelectionTableProps) =
     handleCheckChange(iso.id, fieldMap[type], false);
   };
 
+  const sectionNumberStyle = {
+    background: `linear-gradient(180deg, ${moduleColors.primaryColor}, ${moduleColors.secondaryColor})`,
+  };
+
+  const sectionTitleStyle = {
+    background: `linear-gradient(180deg, ${moduleColors.primaryColor}, ${moduleColors.secondaryColor})`,
+    WebkitBackgroundClip: 'text',
+    WebkitTextFillColor: 'transparent',
+    backgroundClip: 'text',
+  };
+
+  const tableHeaderStyle = {
+    background: `linear-gradient(180deg, ${moduleColors.primaryColor}, ${moduleColors.secondaryColor})`,
+  };
+
   return (
     <div className="card-corporate animate-fade-in">
-      <div className="section-title">
-        <span className="section-number">2</span>
-        <span>Selección de Normativas ISO</span>
+      <div className="flex items-center gap-3 text-lg font-semibold mb-4">
+        <span 
+          className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold text-white shadow-md"
+          style={sectionNumberStyle}
+        >
+          2
+        </span>
+        <span style={sectionTitleStyle}>Selección de Normativas ISO</span>
       </div>
 
       <div className="overflow-x-auto">
         <table className="w-full">
           <thead>
-            <tr className="table-header">
-              <th className="text-left py-3 px-4 font-semibold rounded-tl-md">
+            <tr style={tableHeaderStyle} className="text-white">
+              <th className="text-left py-3 px-4 font-semibold rounded-tl-md text-white">
                 Estándar
               </th>
-              <th className="text-center py-3 px-4 font-semibold">Certificación</th>
-              <th className="text-center py-3 px-4 font-semibold">Seguimiento 1 y 2</th>
-              <th className="text-center py-3 px-4 font-semibold rounded-tr-md">
+              <th className="text-center py-3 px-4 font-semibold text-white">Certificación</th>
+              <th className="text-center py-3 px-4 font-semibold text-white">Seguimiento 1 y 2</th>
+              <th className="text-center py-3 px-4 font-semibold rounded-tr-md text-white">
                 Recertificación
               </th>
             </tr>
@@ -115,7 +137,7 @@ const ISOSelectionTable = ({ selectedISOs, onChange }: ISOSelectionTableProps) =
                 >
                   <td className="py-3 px-4">
                     <div>
-                      <div className="font-semibold text-primary">{iso.code}</div>
+                      <div className="font-semibold" style={{ color: moduleColors.primaryColor }}>{iso.code}</div>
                       <div className="text-sm text-muted-foreground">
                         {iso.description}
                       </div>
@@ -216,7 +238,15 @@ const ISOSelectionTable = ({ selectedISOs, onChange }: ISOSelectionTableProps) =
               Seleccionados:
             </span>
             {getSelectedTags().map((tag, index) => (
-              <span key={index} className="tag-selected">
+              <span 
+                key={index} 
+                className="inline-flex items-center gap-1 px-3 py-1 text-sm rounded-full border"
+                style={{ 
+                  backgroundColor: `${moduleColors.primaryColor}15`,
+                  color: moduleColors.primaryColor,
+                  borderColor: `${moduleColors.primaryColor}30`
+                }}
+              >
                 {tag.isoCode} - {tag.type}
                 <button
                   onClick={() => removeTag(tag.isoCode, tag.type)}

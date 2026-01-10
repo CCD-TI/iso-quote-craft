@@ -16,11 +16,13 @@ import {
 import { ClientData, SelectedISO } from '@/types/quotation';
 import { useApp } from '@/context/AppContext';
 import { useToast } from '@/hooks/use-toast';
+import { useModuleStyles } from '@/context/ModuleColorsContext';
 import html2pdf from 'html2pdf.js';
 
 const Index = () => {
   const { getNextQuotationCode, addQuotation } = useApp();
   const { toast } = useToast();
+  const styles = useModuleStyles('generador');
   const previewRef = useRef<HTMLDivElement>(null);
   const [showPreview, setShowPreview] = useState(false);
 
@@ -189,19 +191,21 @@ const Index = () => {
       </div>
 
       <div className="space-y-6">
-        <ClientDataForm data={clientData} onChange={setClientData} />
-        <ISOSelectionTable selectedISOs={selectedISOs} onChange={setSelectedISOs} />
+        <ClientDataForm data={clientData} onChange={setClientData} moduleColors={styles.colors} />
+        <ISOSelectionTable selectedISOs={selectedISOs} onChange={setSelectedISOs} moduleColors={styles.colors} />
         <PriceSummary
           selectedISOs={selectedISOs}
           discount={discount}
           onDiscountChange={setDiscount}
+          moduleColors={styles.colors}
         />
         
         {/* Preview Button at the bottom */}
         <div className="flex justify-center pt-4">
           <Button
             onClick={handlePreview}
-            className="flex items-center gap-2 bg-gradient-corporate hover:opacity-90 text-white px-8 py-3 text-lg shadow-lg"
+            className="flex items-center gap-2 hover:opacity-90 text-white px-8 py-3 text-lg shadow-lg"
+            style={styles.headerStyle}
           >
             <Eye className="w-5 h-5" />
             Vista Previa
@@ -219,6 +223,7 @@ const Index = () => {
             client={clientData}
             selectedISOs={selectedISOs}
             discount={discount}
+            moduleColors={styles.colors}
           />
           <DialogFooter className="flex gap-2 mt-4">
             <Button variant="outline" onClick={() => setShowPreview(false)}>

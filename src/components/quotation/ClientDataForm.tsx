@@ -1,5 +1,6 @@
 import { useApp } from '@/context/AppContext';
 import { ClientData } from '@/types/quotation';
+import { ModuleColors } from '@/context/ModuleColorsContext';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { CalendarIcon } from 'lucide-react';
@@ -22,9 +23,10 @@ import {
 interface ClientDataFormProps {
   data: ClientData;
   onChange: (data: ClientData) => void;
+  moduleColors: ModuleColors;
 }
 
-const ClientDataForm = ({ data, onChange }: ClientDataFormProps) => {
+const ClientDataForm = ({ data, onChange, moduleColors }: ClientDataFormProps) => {
   const { advisors, getNextQuotationCode } = useApp();
 
   const handleChange = (field: keyof ClientData, value: string | Date) => {
@@ -37,11 +39,27 @@ const ClientDataForm = ({ data, onChange }: ClientDataFormProps) => {
     onChange(newData);
   };
 
+  const sectionNumberStyle = {
+    background: `linear-gradient(180deg, ${moduleColors.primaryColor}, ${moduleColors.secondaryColor})`,
+  };
+
+  const sectionTitleStyle = {
+    background: `linear-gradient(180deg, ${moduleColors.primaryColor}, ${moduleColors.secondaryColor})`,
+    WebkitBackgroundClip: 'text',
+    WebkitTextFillColor: 'transparent',
+    backgroundClip: 'text',
+  };
+
   return (
     <div className="card-corporate animate-fade-in">
-      <div className="section-title">
-        <span className="section-number">1</span>
-        <span>Datos del Cliente</span>
+      <div className="flex items-center gap-3 text-lg font-semibold mb-4">
+        <span 
+          className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold text-white shadow-md"
+          style={sectionNumberStyle}
+        >
+          1
+        </span>
+        <span style={sectionTitleStyle}>Datos del Cliente</span>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

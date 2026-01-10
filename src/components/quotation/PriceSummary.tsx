@@ -1,13 +1,15 @@
 import { useApp } from '@/context/AppContext';
 import { SelectedISO, QuotationSummaryItem } from '@/types/quotation';
+import { ModuleColors } from '@/context/ModuleColorsContext';
 
 interface PriceSummaryProps {
   selectedISOs: SelectedISO[];
   discount: number;
   onDiscountChange: (discount: number) => void;
+  moduleColors: ModuleColors;
 }
 
-const PriceSummary = ({ selectedISOs, discount, onDiscountChange }: PriceSummaryProps) => {
+const PriceSummary = ({ selectedISOs, discount, onDiscountChange, moduleColors }: PriceSummaryProps) => {
   const { isoStandards } = useApp();
 
   const getSummaryItems = (): QuotationSummaryItem[] => {
@@ -51,21 +53,45 @@ const PriceSummary = ({ selectedISOs, discount, onDiscountChange }: PriceSummary
     return `S/ ${amount.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   };
 
+  const sectionNumberStyle = {
+    background: `linear-gradient(180deg, ${moduleColors.primaryColor}, ${moduleColors.secondaryColor})`,
+  };
+
+  const sectionTitleStyle = {
+    background: `linear-gradient(180deg, ${moduleColors.primaryColor}, ${moduleColors.secondaryColor})`,
+    WebkitBackgroundClip: 'text',
+    WebkitTextFillColor: 'transparent',
+    backgroundClip: 'text',
+  };
+
+  const tableHeaderStyle = {
+    background: `linear-gradient(180deg, ${moduleColors.primaryColor}, ${moduleColors.secondaryColor})`,
+  };
+
+  const finalPriceStyle = {
+    background: `linear-gradient(180deg, ${moduleColors.primaryColor}, ${moduleColors.secondaryColor})`,
+  };
+
   return (
     <div className="card-corporate animate-fade-in">
-      <div className="section-title">
-        <span className="section-number">3</span>
-        <span>Resumen de Precios</span>
+      <div className="flex items-center gap-3 text-lg font-semibold mb-4">
+        <span 
+          className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold text-white shadow-md"
+          style={sectionNumberStyle}
+        >
+          3
+        </span>
+        <span style={sectionTitleStyle}>Resumen de Precios</span>
       </div>
 
       <div className="overflow-x-auto">
         <table className="w-full">
           <thead>
-            <tr className="table-header">
-              <th className="text-left py-3 px-4 font-semibold rounded-tl-md">
+            <tr style={tableHeaderStyle} className="text-white">
+              <th className="text-left py-3 px-4 font-semibold rounded-tl-md text-white">
                 Concepto
               </th>
-              <th className="text-right py-3 px-4 font-semibold rounded-tr-md">
+              <th className="text-right py-3 px-4 font-semibold rounded-tr-md text-white">
                 Monto
               </th>
             </tr>
@@ -79,7 +105,7 @@ const PriceSummary = ({ selectedISOs, discount, onDiscountChange }: PriceSummary
                 }`}
               >
                 <td className="py-3 px-4">
-                  <span className="font-medium text-primary">{item.isoCode}</span>
+                  <span className="font-medium" style={{ color: moduleColors.primaryColor }}>{item.isoCode}</span>
                   <span className="text-muted-foreground"> ({item.type})</span>
                 </td>
                 <td className="py-3 px-4 text-right font-medium">
@@ -129,7 +155,10 @@ const PriceSummary = ({ selectedISOs, discount, onDiscountChange }: PriceSummary
               - {formatCurrency(discountAmount)}
             </span>
           </div>
-          <div className="flex justify-between items-center py-3 px-4 bg-gradient-corporate text-white rounded-md">
+          <div 
+            className="flex justify-between items-center py-3 px-4 text-white rounded-md"
+            style={finalPriceStyle}
+          >
             <span className="font-bold text-lg">PRECIO FINAL</span>
             <span className="font-bold text-xl">{formatCurrency(finalTotal)}</span>
           </div>

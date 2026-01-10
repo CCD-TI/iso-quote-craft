@@ -29,7 +29,7 @@ import html2pdf from 'html2pdf.js';
 const Historial = () => {
   const { quotations, setQuotations } = useApp();
   const { toast } = useToast();
-  const { sectionNumberStyle, tableHeaderStyle } = useModuleStyles('historial');
+  const styles = useModuleStyles('historial');
   const [search, setSearch] = useState('');
   const [selectedQuotation, setSelectedQuotation] = useState<Quotation | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
@@ -124,7 +124,7 @@ const Historial = () => {
       <div className="card-corporate">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
           <div className="section-title mb-0">
-            <span className="section-number" style={sectionNumberStyle}>
+            <span className="section-number" style={styles.sectionNumberStyle}>
               <FileText className="w-4 h-4" />
             </span>
             <span>Historial de Cotizaciones</span>
@@ -150,7 +150,7 @@ const Historial = () => {
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr style={tableHeaderStyle}>
+                <tr style={styles.tableHeaderStyle}>
                   <th className="text-left py-3 px-4 font-semibold rounded-tl-md">Código</th>
                   <th className="text-left py-3 px-4 font-semibold">Cliente</th>
                   <th className="text-left py-3 px-4 font-semibold">Fecha</th>
@@ -231,6 +231,7 @@ const Historial = () => {
               client={selectedQuotation.client}
               selectedISOs={selectedQuotation.selectedISOs}
               discount={selectedQuotation.discount}
+              moduleColors={styles.colors}
             />
           )}
         </DialogContent>
@@ -248,6 +249,7 @@ const Historial = () => {
               client={downloadQuotation.client}
               selectedISOs={downloadQuotation.selectedISOs}
               discount={downloadQuotation.discount}
+              moduleColors={styles.colors}
             />
           )}
         </DialogContent>

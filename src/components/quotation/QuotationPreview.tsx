@@ -1,6 +1,7 @@
 import { forwardRef } from 'react';
 import { useApp } from '@/context/AppContext';
 import { ClientData, SelectedISO } from '@/types/quotation';
+import { ModuleColors } from '@/context/ModuleColorsContext';
 import { numeroALetras } from '@/utils/numberToWords';
 import { CheckCircle2 } from 'lucide-react';
 
@@ -15,10 +16,11 @@ interface QuotationPreviewProps {
   client: ClientData;
   selectedISOs: SelectedISO[];
   discount: number;
+  moduleColors: ModuleColors;
 }
 
 const QuotationPreview = forwardRef<HTMLDivElement, QuotationPreviewProps>(
-  ({ client, selectedISOs, discount }, ref) => {
+  ({ client, selectedISOs, discount, moduleColors }, ref) => {
     const { isoStandards, advisors, bankAccounts, certificationSteps } = useApp();
     const advisor = advisors.find((a) => a.id === client.asesorId);
 
@@ -58,6 +60,10 @@ const QuotationPreview = forwardRef<HTMLDivElement, QuotationPreviewProps>(
       return `S/ ${amount.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
     };
 
+    const headerStyle = {
+      background: `linear-gradient(180deg, ${moduleColors.primaryColor}, ${moduleColors.secondaryColor})`,
+    };
+
     return (
       <div 
         ref={ref} 
@@ -88,9 +94,9 @@ const QuotationPreview = forwardRef<HTMLDivElement, QuotationPreviewProps>(
 
             {/* Right - Date, Validity and Title */}
             <div className="text-right text-sm">
-              <p>Día: <span className="font-semibold text-primary">{formattedDate}</span></p>
-              <p className="font-semibold text-turquoise">Cotización válida por 48 horas</p>
-              <h1 className="text-2xl font-bold text-primary mt-2">
+              <p>Día: <span className="font-semibold" style={{ color: moduleColors.primaryColor }}>{formattedDate}</span></p>
+              <p className="font-semibold" style={{ color: moduleColors.accentColor }}>Cotización válida por 48 horas</p>
+              <h1 className="text-2xl font-bold mt-2" style={{ color: moduleColors.primaryColor }}>
                 ACUERDO COMERCIAL
               </h1>
             </div>
@@ -103,7 +109,7 @@ const QuotationPreview = forwardRef<HTMLDivElement, QuotationPreviewProps>(
           </div>
 
           {/* Client Info Box */}
-          <div className="border-2 border-primary rounded-md p-4 mb-6">
+          <div className="rounded-md p-4 mb-6" style={{ border: `2px solid ${moduleColors.primaryColor}` }}>
             <div className="space-y-2 text-sm">
               <div className="grid grid-cols-[120px_1fr]">
                 <span className="text-muted-foreground">NOMBRE:</span>
@@ -130,18 +136,18 @@ const QuotationPreview = forwardRef<HTMLDivElement, QuotationPreviewProps>(
           {/* Quotation Table */}
           <table className="w-full mb-4 text-sm border-collapse">
             <thead>
-              <tr className="bg-primary text-primary-foreground">
-                <th className="py-2 px-3 text-left font-semibold border border-primary">ESTÁNDAR</th>
-                <th className="py-2 px-3 text-center font-semibold border border-primary">CERTIFICACIÓN</th>
-                <th className="py-2 px-3 text-center font-semibold border border-primary">SEGUIMIENTO 1 Y 2</th>
-                <th className="py-2 px-3 text-center font-semibold border border-primary">RECERTIFICACIÓN</th>
+              <tr style={headerStyle} className="text-white">
+                <th className="py-2 px-3 text-left font-semibold border text-white" style={{ borderColor: moduleColors.primaryColor }}>ESTÁNDAR</th>
+                <th className="py-2 px-3 text-center font-semibold border text-white" style={{ borderColor: moduleColors.primaryColor }}>CERTIFICACIÓN</th>
+                <th className="py-2 px-3 text-center font-semibold border text-white" style={{ borderColor: moduleColors.primaryColor }}>SEGUIMIENTO 1 Y 2</th>
+                <th className="py-2 px-3 text-center font-semibold border text-white" style={{ borderColor: moduleColors.primaryColor }}>RECERTIFICACIÓN</th>
               </tr>
             </thead>
             <tbody>
               {items.map(({ iso, selected }, index) => (
                 <tr key={index} className="border border-border bg-white/80">
                   <td className="py-2 px-3 border border-border">
-                    <div className="font-semibold text-primary">{iso.code}</div>
+                    <div className="font-semibold" style={{ color: moduleColors.primaryColor }}>{iso.code}</div>
                     <div className="text-xs text-muted-foreground">{iso.description}</div>
                   </td>
                   <td className="py-2 px-3 text-center border border-border">
@@ -175,26 +181,29 @@ const QuotationPreview = forwardRef<HTMLDivElement, QuotationPreviewProps>(
                   <span className="font-semibold text-destructive">- {formatCurrency(discountAmount)}</span>
                 </div>
               )}
-              <div className="flex justify-between py-2 bg-primary text-white font-bold">
+              <div className="flex justify-between py-2 text-white font-bold" style={headerStyle}>
                 <span className="px-2">TARIFA FINAL</span>
                 <span className="px-2">{formatCurrency(finalTotal)}</span>
               </div>
-              <div className="bg-primary/10 p-2 text-xs text-center mt-1 bg-white/80">
+              <div className="p-2 text-xs text-center mt-1 bg-white/80" style={{ backgroundColor: `${moduleColors.primaryColor}15` }}>
                 {numeroALetras(finalTotal)}
               </div>
             </div>
           </div>
 
           {/* Certification Flow */}
-          <div className="mb-6 border-2 border-primary rounded-md p-4">
-            <h3 className="font-bold text-sm mb-3 text-primary text-center">FLUJO DE CERTIFICACIÓN</h3>
+          <div className="mb-6 rounded-md p-4" style={{ border: `2px solid ${moduleColors.primaryColor}` }}>
+            <h3 className="font-bold text-sm mb-3 text-center" style={{ color: moduleColors.primaryColor }}>FLUJO DE CERTIFICACIÓN</h3>
             <div className="flex justify-center gap-4">
               {certificationSteps.map((step) => (
                 <div key={step.id} className="flex flex-col items-center text-center" style={{ width: '90px' }}>
-                  <div className="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center text-sm font-bold mb-1 shadow-md">
+                  <div 
+                    className="w-8 h-8 rounded-full text-white flex items-center justify-center text-sm font-bold mb-1 shadow-md"
+                    style={headerStyle}
+                  >
                     {step.order}
                   </div>
-                  <CheckCircle2 className="w-5 h-5 text-primary mb-1" />
+                  <CheckCircle2 className="w-5 h-5 mb-1" style={{ color: moduleColors.primaryColor }} />
                   <span className="text-[10px] leading-tight">{step.title}</span>
                 </div>
               ))}
@@ -203,7 +212,7 @@ const QuotationPreview = forwardRef<HTMLDivElement, QuotationPreviewProps>(
 
           {/* Bank Accounts */}
           <div className="mb-6 p-4 bg-white/80 rounded border border-border">
-            <h3 className="font-bold text-sm mb-3 text-primary">CUENTAS BANCARIAS</h3>
+            <h3 className="font-bold text-sm mb-3" style={{ color: moduleColors.primaryColor }}>CUENTAS BANCARIAS</h3>
             <div className="space-y-3">
               {bankAccounts.map((bank) => (
                 <div key={bank.id} className="flex items-start gap-3">
@@ -212,12 +221,15 @@ const QuotationPreview = forwardRef<HTMLDivElement, QuotationPreviewProps>(
                   ) : bank.bankName.toLowerCase().includes('interbank') ? (
                     <img src={logoInterbank} alt="Interbank" className="h-8 object-contain" />
                   ) : (
-                    <div className="w-8 h-8 bg-primary text-primary-foreground rounded flex items-center justify-center text-xs font-bold">
+                    <div 
+                      className="w-8 h-8 text-white rounded flex items-center justify-center text-xs font-bold"
+                      style={{ backgroundColor: moduleColors.primaryColor }}
+                    >
                       {bank.bankName.charAt(0)}
                     </div>
                   )}
                   <div className="text-sm">
-                    <p className="font-bold text-primary">{bank.accountHolder}</p>
+                    <p className="font-bold" style={{ color: moduleColors.primaryColor }}>{bank.accountHolder}</p>
                     <p className="text-muted-foreground">
                       Cuenta corriente en {bank.currency}: N° {bank.accountNumber}
                     </p>
@@ -231,7 +243,7 @@ const QuotationPreview = forwardRef<HTMLDivElement, QuotationPreviewProps>(
           {/* Footer */}
           <div className="text-center pt-4 border-t border-border">
             <p className="text-sm">
-              Asesor: <span className="font-semibold text-primary">{advisor?.name || 'No asignado'}</span>
+              Asesor: <span className="font-semibold" style={{ color: moduleColors.primaryColor }}>{advisor?.name || 'No asignado'}</span>
             </p>
           </div>
         </div>
