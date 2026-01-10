@@ -305,6 +305,134 @@ const Archivos = () => {
         </Card>
       </div>
 
+      {/* Vista Previa del Reporte Completo */}
+      {(savedImage || savedPDF) && (
+        <Card className="mt-6">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Eye className="w-5 h-5" style={{ color: styles.colors.primaryColor }} />
+              Vista Previa del Reporte
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-muted-foreground mb-4">
+              Así se verá el reporte con los archivos guardados:
+            </p>
+            
+            {/* Simulated Report Preview */}
+            <div className="border-2 rounded-lg overflow-hidden shadow-lg">
+              {/* Report with Background Image */}
+              <div 
+                className="relative bg-white p-6 min-h-[400px]"
+                style={{
+                  backgroundImage: savedImage ? `url(${savedImage})` : 'none',
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center',
+                  backgroundRepeat: 'no-repeat',
+                }}
+              >
+                {/* Overlay for readability */}
+                <div className="absolute inset-0 bg-white/85" />
+                
+                {/* Sample Report Content */}
+                <div className="relative z-10">
+                  <div className="flex justify-between items-start mb-4">
+                    <div className="flex items-center gap-3">
+                      <div 
+                        className="w-16 h-16 rounded-full flex items-center justify-center text-white font-bold text-xl"
+                        style={{ backgroundColor: styles.colors.primaryColor }}
+                      >
+                        CCD
+                      </div>
+                      <div>
+                        <h3 className="font-bold text-lg" style={{ color: styles.colors.primaryColor }}>
+                          ACUERDO COMERCIAL
+                        </h3>
+                        <p className="text-sm text-muted-foreground">Cotización de ejemplo</p>
+                      </div>
+                    </div>
+                    <div className="text-right text-sm">
+                      <p>Código: <span className="font-mono font-bold">COT-2024-001</span></p>
+                      <p className="text-muted-foreground">Fecha: {new Date().toLocaleDateString('es-PE')}</p>
+                    </div>
+                  </div>
+
+                  {/* Sample Client Box */}
+                  <div 
+                    className="rounded-md p-4 mb-4"
+                    style={{ border: `2px solid ${styles.colors.primaryColor}` }}
+                  >
+                    <div className="grid grid-cols-2 gap-2 text-sm">
+                      <div>
+                        <span className="text-muted-foreground">Cliente:</span>
+                        <span className="ml-2 font-semibold">Empresa Ejemplo S.A.C.</span>
+                      </div>
+                      <div>
+                        <span className="text-muted-foreground">RUC:</span>
+                        <span className="ml-2 font-semibold">20123456789</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Sample Table */}
+                  <table className="w-full text-sm border-collapse mb-4">
+                    <thead>
+                      <tr 
+                        className="text-white"
+                        style={{ background: `linear-gradient(180deg, ${styles.colors.primaryColor}, ${styles.colors.secondaryColor})` }}
+                      >
+                        <th className="py-2 px-3 text-left">ESTÁNDAR</th>
+                        <th className="py-2 px-3 text-center">CERTIFICACIÓN</th>
+                        <th className="py-2 px-3 text-center">SEGUIMIENTO</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr className="border-b">
+                        <td className="py-2 px-3 font-semibold" style={{ color: styles.colors.primaryColor }}>ISO 9001:2015</td>
+                        <td className="py-2 px-3 text-center">S/ 5,000.00</td>
+                        <td className="py-2 px-3 text-center">S/ 2,500.00</td>
+                      </tr>
+                    </tbody>
+                  </table>
+
+                  {/* Sample Total */}
+                  <div className="flex justify-end">
+                    <div 
+                      className="px-4 py-2 rounded text-white font-bold"
+                      style={{ background: `linear-gradient(180deg, ${styles.colors.primaryColor}, ${styles.colors.secondaryColor})` }}
+                    >
+                      TOTAL: S/ 8,850.00
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Attached PDF Section */}
+              {savedPDF && (
+                <div className="border-t-2 p-4 bg-muted/30">
+                  <h4 
+                    className="font-bold text-sm mb-3 flex items-center gap-2"
+                    style={{ color: styles.colors.primaryColor }}
+                  >
+                    <FileText className="w-4 h-4" />
+                    DOCUMENTO ADJUNTO: {savedPdfName}
+                  </h4>
+                  <iframe
+                    src={savedPDF}
+                    className="w-full h-[500px] border rounded"
+                    title="PDF Preview"
+                  />
+                </div>
+              )}
+            </div>
+
+            <p className="text-xs text-muted-foreground mt-4 text-center">
+              Esta es una vista previa de ejemplo. Los datos reales se mostrarán cuando generes una cotización.
+            </p>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Info Section */}
       <Card className="mt-6">
         <CardHeader>
