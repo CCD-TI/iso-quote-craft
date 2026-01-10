@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useMemo } from 'react';
 
 export interface ModuleColors {
   id: string;
@@ -195,10 +195,13 @@ export const useModuleColors = () => {
 
 // Hook para obtener los estilos de un módulo específico
 export const useModuleStyles = (moduleId: string) => {
-  const { getModuleColors } = useModuleColors();
-  const colors = getModuleColors(moduleId);
+  const { moduleColors } = useModuleColors();
+  
+  const colors = useMemo(() => {
+    return moduleColors.find(m => m.id === moduleId) || moduleColors[0];
+  }, [moduleColors, moduleId]);
 
-  return {
+  const styles = useMemo(() => ({
     colors,
     headerStyle: {
       background: `linear-gradient(180deg, ${colors.primaryColor}, ${colors.secondaryColor})`,
@@ -214,5 +217,7 @@ export const useModuleStyles = (moduleId: string) => {
       background: `linear-gradient(180deg, ${colors.primaryColor}, ${colors.secondaryColor})`,
       color: 'white',
     },
-  };
+  }), [colors]);
+
+  return styles;
 };

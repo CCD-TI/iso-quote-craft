@@ -31,8 +31,8 @@ const ConfiguracionColores = () => {
   const handleSave = () => {
     saveColors();
     toast({
-      title: "Colores guardados",
-      description: "La configuración de colores se ha guardado y aplicado a todos los módulos.",
+      title: "✅ Colores aplicados",
+      description: "Los cambios se han guardado. Navega a cualquier módulo para ver los nuevos colores.",
     });
   };
 
