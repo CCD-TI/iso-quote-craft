@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
-import { FileText, Users, Settings, History, Building2 } from 'lucide-react';
+import { FileText, Users, Settings, History, Building2, GitBranch } from 'lucide-react';
 import logoCCD from '@/assets/logo-ccd.jpg';
 
 const Header = () => {
@@ -11,6 +11,7 @@ const Header = () => {
     { path: '/asesores', label: 'Asesores', icon: Users },
     { path: '/normas', label: 'Normas ISO', icon: Settings },
     { path: '/bancos', label: 'Bancos', icon: Building2 },
+    { path: '/flujo-certificacion', label: 'Flujo', icon: GitBranch },
   ];
 
   return (

@@ -64,3 +64,9 @@ export interface QuotationSummaryItem {
   type: string;
   amount: number;
 }
+
+export interface CertificationStep {
+  id: string;
+  order: number;
+  title: string;
+}
