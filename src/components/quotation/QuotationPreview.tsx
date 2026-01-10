@@ -125,12 +125,6 @@ const QuotationPreview = forwardRef<HTMLDivElement, QuotationPreviewProps>(
             Quedamos atentos a cualquier consulta o ajuste que necesites realizar.
           </p>
 
-          {/* Quotation Badge */}
-          <div className="mb-4">
-            <span className="inline-block bg-primary text-primary-foreground px-4 py-1 rounded text-sm font-semibold">
-              COTIZACIÓN
-            </span>
-          </div>
 
           {/* Quotation Table */}
           <table className="w-full mb-4 text-sm border-collapse">
@@ -196,7 +190,7 @@ const QuotationPreview = forwardRef<HTMLDivElement, QuotationPreviewProps>(
             <div className="flex flex-wrap justify-center gap-2">
               {certificationSteps.map((step) => (
                 <div key={step.id} className="flex flex-col items-center text-center" style={{ width: '80px' }}>
-                  <div className="w-8 h-8 rounded-full bg-gradient-corporate text-white flex items-center justify-center text-sm font-bold mb-1 shadow-md">
+                  <div className="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center text-sm font-bold mb-1 shadow-md border-2 border-primary">
                     {step.order}
                   </div>
                   <CheckCircle2 className="w-5 h-5 text-primary mb-1" />
