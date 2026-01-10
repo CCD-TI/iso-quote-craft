@@ -105,7 +105,7 @@ const Index = () => {
     setShowPreview(true);
   };
 
-  const saveQuotation = () => {
+  const saveQuotation = async () => {
     const subtotal = selectedISOs.reduce((sum, sel) => {
       let total = 0;
       if (sel.certification) total += sel.certificationPrice;
@@ -132,58 +132,89 @@ const Index = () => {
       status: 'draft',
     });
 
+    // Also download PDF when saving
+    await downloadPdfFromRef();
+
     toast({
-      title: 'Cotización guardada',
-      description: 'La cotización se ha guardado en el historial',
+      title: 'Cotización guardada y descargada',
+      description: 'La cotización se ha guardado en el historial y descargado como PDF',
     });
     setShowPreview(false);
+  };
+
+  const downloadPdfFromRef = async () => {
+    // Wait a moment to ensure ref is ready
+    await new Promise(resolve => setTimeout(resolve, 100));
+    
+    const el = downloadRef.current;
+    if (!el) return;
+
+    const filename = `${clientData.codigo}.pdf`;
+    const options = {
+      margin: [10, 10, 10, 10] as [number, number, number, number],
+      image: { type: 'jpeg' as const, quality: 0.98 },
+      html2canvas: { scale: 2, useCORS: true },
+      jsPDF: { unit: 'mm' as const, format: 'a4' as const, orientation: 'portrait' as const },
+    };
+
+    try {
+      const quotationPdf = await generatePdfArrayBufferFromElement(el, options);
+      const attachedPdfDataUrl = localStorage.getItem('attachedPDF');
+      
+      if (attachedPdfDataUrl) {
+        const mergedBytes = await mergePdfArrayBufferWithDataUrl(quotationPdf, attachedPdfDataUrl);
+        downloadPdfBytes(mergedBytes, filename);
+      } else {
+        downloadPdfArrayBuffer(quotationPdf, filename);
+      }
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+    }
   };
 
   const handleDownloadPDF = async () => {
     if (!validateForm()) return;
 
-    // Keep the existing behavior: open preview while generating
+    // Open preview while generating
     setShowPreview(true);
 
-    // Wait a moment for any UI updates
+    // Wait a moment for UI updates
     setTimeout(async () => {
-      const el = downloadRef.current;
-      if (!el) {
-        toast({
-          title: 'Error',
-          description: 'No se pudo preparar el documento para descarga',
-          variant: 'destructive',
-        });
-        return;
-      }
-
-      const filename = `${clientData.codigo}.pdf`;
-      const options = {
-        margin: [10, 10, 10, 10] as [number, number, number, number],
-        image: { type: 'jpeg' as const, quality: 0.98 },
-        html2canvas: { scale: 2, useCORS: true },
-        jsPDF: { unit: 'mm' as const, format: 'a4' as const, orientation: 'portrait' as const },
-      };
-
       try {
-        // 1) Generate the quotation PDF from HTML
-        const quotationPdf = await generatePdfArrayBufferFromElement(el, options);
+        await downloadPdfFromRef();
 
-        // 2) If there's an uploaded PDF, merge it as extra pages
-        const attachedPdfDataUrl = localStorage.getItem('attachedPDF');
-        if (attachedPdfDataUrl) {
-          const mergedBytes = await mergePdfArrayBufferWithDataUrl(quotationPdf, attachedPdfDataUrl);
-          downloadPdfBytes(mergedBytes, filename);
-        } else {
-          downloadPdfArrayBuffer(quotationPdf, filename);
-        }
+        // Save quotation to history (without downloading again)
+        const subtotal = selectedISOs.reduce((sum, sel) => {
+          let total = 0;
+          if (sel.certification) total += sel.certificationPrice;
+          if (sel.followUp) total += sel.followUpPrice;
+          if (sel.recertification) total += sel.recertificationPrice;
+          return sum + total;
+        }, 0);
 
-        saveQuotation();
+        const igv = subtotal * 0.18;
+        const totalConIGV = subtotal + igv;
+        const discountAmount = totalConIGV * (discount / 100);
+        const finalTotal = totalConIGV - discountAmount;
+
+        addQuotation({
+          id: Date.now().toString(),
+          code: clientData.codigo,
+          date: new Date().toISOString(),
+          client: clientData,
+          selectedISOs,
+          subtotal,
+          igv,
+          discount,
+          total: finalTotal,
+          status: 'draft',
+        });
+
         setShowPreview(false);
 
         toast({
           title: 'PDF generado',
-          description: 'La cotización se ha descargado correctamente',
+          description: 'La cotización se ha guardado y descargado correctamente',
         });
       } catch (error) {
         toast({

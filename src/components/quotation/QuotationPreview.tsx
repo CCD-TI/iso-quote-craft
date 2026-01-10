@@ -267,16 +267,6 @@ const QuotationPreview = forwardRef<HTMLDivElement, QuotationPreviewProps>(
                   />
                 </object>
               </div>
-              <div className="mt-3 text-center">
-                <a
-                  href={attachedPDF}
-                  download={pdfName}
-                  className="inline-flex items-center gap-2 px-4 py-2 rounded text-white text-sm font-medium hover:opacity-90 transition-opacity"
-                  style={{ backgroundColor: moduleColors.primaryColor }}
-                >
-                  Descargar PDF adjunto
-                </a>
-              </div>
             </div>
           )}
         </div>
