@@ -14,17 +14,17 @@ const Header = () => {
   ];
 
   return (
-    <header className="bg-primary text-primary-foreground shadow-lg">
+    <header className="bg-gradient-corporate text-white shadow-lg">
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-3">
-              <img src={logoCCD} alt="CCD Logo" className="h-10 w-10 rounded-full object-cover" />
+              <img src={logoCCD} alt="CCD Logo" className="h-10 w-10 rounded-full object-cover border-2 border-white/30" />
               <div>
                 <h1 className="text-lg font-heading font-bold leading-tight">
                   Generador de Cotizaciones ISO
                 </h1>
-                <p className="text-xs text-primary-foreground/80">
+                <p className="text-xs text-white/80">
                   CCD - Centro de Capacitación y Desarrollo
                 </p>
               </div>
@@ -39,10 +39,10 @@ const Header = () => {
                 <Link
                   key={item.path}
                   to={item.path}
-                  className={`flex items-center gap-2 px-3 py-2 rounded-md transition-colors ${
+                  className={`flex items-center gap-2 px-3 py-2 rounded-md transition-all duration-200 ${
                     isActive
-                      ? 'bg-primary-foreground/20 text-primary-foreground'
-                      : 'text-primary-foreground/70 hover:text-primary-foreground hover:bg-primary-foreground/10'
+                      ? 'bg-white/20 text-white shadow-sm'
+                      : 'text-white/70 hover:text-white hover:bg-white/10'
                   }`}
                 >
                   <Icon className="w-4 h-4" />
