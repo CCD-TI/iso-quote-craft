@@ -1,28 +1,37 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import Layout from '@/components/layout/Layout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Palette, Save, RotateCcw, FileText, History, Users, Settings, Building2, GitBranch, Eye } from 'lucide-react';
+import { Palette, Save, RotateCcw, FileText, History, Users, Settings, Building2, GitBranch, Eye, LucideIcon } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 interface ModuleColors {
   id: string;
   name: string;
-  icon: React.ElementType;
   primaryColor: string;
   secondaryColor: string;
   accentColor: string;
 }
 
+// Icon map - separado del estado para evitar problemas de serialización
+const iconMap: Record<string, LucideIcon> = {
+  generador: FileText,
+  historial: History,
+  asesores: Users,
+  normas: Settings,
+  bancos: Building2,
+  flujo: GitBranch,
+};
+
 const defaultModuleColors: ModuleColors[] = [
-  { id: 'generador', name: 'Generador de Cotizaciones', icon: FileText, primaryColor: '#1e3a5f', secondaryColor: '#2d4a6f', accentColor: '#c9a227' },
-  { id: 'historial', name: 'Historial', icon: History, primaryColor: '#1e3a5f', secondaryColor: '#2d4a6f', accentColor: '#c9a227' },
-  { id: 'asesores', name: 'Asesores', icon: Users, primaryColor: '#1e3a5f', secondaryColor: '#2d4a6f', accentColor: '#c9a227' },
-  { id: 'normas', name: 'Normas ISO', icon: Settings, primaryColor: '#1e3a5f', secondaryColor: '#2d4a6f', accentColor: '#c9a227' },
-  { id: 'bancos', name: 'Cuentas Bancarias', icon: Building2, primaryColor: '#1e3a5f', secondaryColor: '#2d4a6f', accentColor: '#c9a227' },
-  { id: 'flujo', name: 'Flujo de Certificación', icon: GitBranch, primaryColor: '#1e3a5f', secondaryColor: '#2d4a6f', accentColor: '#c9a227' },
+  { id: 'generador', name: 'Generador de Cotizaciones', primaryColor: '#1e3a5f', secondaryColor: '#2d4a6f', accentColor: '#c9a227' },
+  { id: 'historial', name: 'Historial', primaryColor: '#1e3a5f', secondaryColor: '#2d4a6f', accentColor: '#c9a227' },
+  { id: 'asesores', name: 'Asesores', primaryColor: '#1e3a5f', secondaryColor: '#2d4a6f', accentColor: '#c9a227' },
+  { id: 'normas', name: 'Normas ISO', primaryColor: '#1e3a5f', secondaryColor: '#2d4a6f', accentColor: '#c9a227' },
+  { id: 'bancos', name: 'Cuentas Bancarias', primaryColor: '#1e3a5f', secondaryColor: '#2d4a6f', accentColor: '#c9a227' },
+  { id: 'flujo', name: 'Flujo de Certificación', primaryColor: '#1e3a5f', secondaryColor: '#2d4a6f', accentColor: '#c9a227' },
 ];
 
 const ConfiguracionColores = () => {
@@ -120,7 +129,7 @@ const ConfiguracionColores = () => {
         {/* Modules Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {moduleColors.map((module) => {
-            const Icon = module.icon;
+            const Icon = iconMap[module.id] || FileText;
             return (
               <Card key={module.id} className="overflow-hidden">
                 <CardHeader 
@@ -248,7 +257,7 @@ const ConfiguracionColores = () => {
           <CardContent>
             <div className="grid grid-cols-6 gap-2">
               {moduleColors.map((module) => {
-                const Icon = module.icon;
+                const Icon = iconMap[module.id] || FileText;
                 return (
                   <div 
                     key={module.id}
