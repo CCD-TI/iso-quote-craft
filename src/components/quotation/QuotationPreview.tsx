@@ -8,6 +8,7 @@ import { CheckCircle2 } from 'lucide-react';
 import logoCCD from '@/assets/logo-ccd.jpg';
 import logoIAF from '@/assets/logo-iaf.png';
 import logoQRO from '@/assets/logo-qro.png';
+import logoInterbank from '@/assets/logo-interbank.png';
 import watermarkBg from '@/assets/watermark-ccd.jpeg';
 
 interface QuotationPreviewProps {
@@ -185,12 +186,12 @@ const QuotationPreview = forwardRef<HTMLDivElement, QuotationPreviewProps>(
           </div>
 
           {/* Certification Flow */}
-          <div className="mb-6">
-            <h3 className="font-bold text-sm mb-3 text-primary">FLUJO DE CERTIFICACIÓN</h3>
-            <div className="flex flex-wrap justify-center gap-2">
+          <div className="mb-6 border-2 border-primary rounded-md p-4">
+            <h3 className="font-bold text-sm mb-3 text-primary text-center">FLUJO DE CERTIFICACIÓN</h3>
+            <div className="flex justify-center gap-4">
               {certificationSteps.map((step) => (
-                <div key={step.id} className="flex flex-col items-center text-center" style={{ width: '80px' }}>
-                  <div className="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center text-sm font-bold mb-1 shadow-md border-2 border-primary">
+                <div key={step.id} className="flex flex-col items-center text-center" style={{ width: '90px' }}>
+                  <div className="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center text-sm font-bold mb-1 shadow-md">
                     {step.order}
                   </div>
                   <CheckCircle2 className="w-5 h-5 text-primary mb-1" />
@@ -206,9 +207,13 @@ const QuotationPreview = forwardRef<HTMLDivElement, QuotationPreviewProps>(
             <div className="space-y-3">
               {bankAccounts.map((bank) => (
                 <div key={bank.id} className="flex items-start gap-3">
-                  <div className="w-8 h-8 bg-primary text-primary-foreground rounded flex items-center justify-center text-xs font-bold">
-                    {bank.bankName.charAt(0)}
-                  </div>
+                  {bank.bankName.toLowerCase().includes('interbank') ? (
+                    <img src={logoInterbank} alt="Interbank" className="h-8 object-contain" />
+                  ) : (
+                    <div className="w-8 h-8 bg-primary text-primary-foreground rounded flex items-center justify-center text-xs font-bold">
+                      {bank.bankName.charAt(0)}
+                    </div>
+                  )}
                   <div className="text-sm">
                     <p className="font-bold text-primary">{bank.accountHolder}</p>
                     <p className="text-muted-foreground">
