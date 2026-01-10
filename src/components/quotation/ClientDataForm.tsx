@@ -29,11 +29,12 @@ interface ClientDataFormProps {
 const ClientDataForm = ({ data, onChange, moduleColors }: ClientDataFormProps) => {
   const { advisors, getNextQuotationCode } = useApp();
 
-  const handleChange = (field: keyof ClientData, value: string | Date) => {
+  const handleChange = async (field: keyof ClientData, value: string | Date) => {
     const newData = { ...data, [field]: value };
     
     if (field === 'fecha') {
-      newData.codigo = getNextQuotationCode(value as Date);
+      const newCode = await getNextQuotationCode(value as Date);
+      newData.codigo = newCode;
     }
     
     onChange(newData);

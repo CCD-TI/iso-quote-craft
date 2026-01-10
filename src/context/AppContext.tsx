@@ -1,6 +1,12 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext } from 'react';
 import { ISOStandard, Advisor, Quotation, BankAccount, CertificationStep } from '@/types/quotation';
-import { initialISOStandards, initialAdvisors, initialBankAccounts, initialCertificationSteps } from '@/data/initialData';
+import {
+  useISOStandards,
+  useAdvisors,
+  useBankAccounts,
+  useCertificationSteps,
+  useQuotations,
+} from '@/hooks/useSupabaseData';
 
 interface AppContextType {
   isoStandards: ISOStandard[];
@@ -13,148 +19,139 @@ interface AppContextType {
   setBankAccounts: React.Dispatch<React.SetStateAction<BankAccount[]>>;
   certificationSteps: CertificationStep[];
   setCertificationSteps: React.Dispatch<React.SetStateAction<CertificationStep[]>>;
-  addISOStandard: (iso: ISOStandard) => void;
-  updateISOStandard: (iso: ISOStandard) => void;
-  deleteISOStandard: (id: string) => void;
-  addAdvisor: (advisor: Advisor) => void;
-  updateAdvisor: (advisor: Advisor) => void;
-  deleteAdvisor: (id: string) => void;
-  addQuotation: (quotation: Quotation) => void;
-  getNextQuotationCode: (fecha: Date) => string;
-  addBankAccount: (bank: BankAccount) => void;
-  updateBankAccount: (bank: BankAccount) => void;
-  deleteBankAccount: (id: string) => void;
-  addCertificationStep: (step: CertificationStep) => void;
-  updateCertificationStep: (step: CertificationStep) => void;
-  deleteCertificationStep: (id: string) => void;
-  reorderCertificationSteps: (steps: CertificationStep[]) => void;
+  addISOStandard: (iso: ISOStandard) => Promise<void>;
+  updateISOStandard: (iso: ISOStandard) => Promise<void>;
+  deleteISOStandard: (id: string) => Promise<void>;
+  addAdvisor: (advisor: Advisor) => Promise<void>;
+  updateAdvisor: (advisor: Advisor) => Promise<void>;
+  deleteAdvisor: (id: string) => Promise<void>;
+  addQuotation: (quotation: Quotation) => Promise<void>;
+  getNextQuotationCode: (fecha: Date) => Promise<string>;
+  deleteQuotation: (id: string) => Promise<void>;
+  addBankAccount: (bank: BankAccount) => Promise<void>;
+  updateBankAccount: (bank: BankAccount) => Promise<void>;
+  deleteBankAccount: (id: string) => Promise<void>;
+  addCertificationStep: (step: CertificationStep) => Promise<void>;
+  updateCertificationStep: (step: CertificationStep) => Promise<void>;
+  deleteCertificationStep: (id: string) => Promise<void>;
+  reorderCertificationSteps: (steps: CertificationStep[]) => Promise<void>;
+  loading: boolean;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [isoStandards, setIsoStandards] = useState<ISOStandard[]>(() => {
-    const saved = localStorage.getItem('isoStandards');
-    return saved ? JSON.parse(saved) : initialISOStandards;
-  });
+  const {
+    isoStandards,
+    setIsoStandards,
+    loading: isoLoading,
+    addISOStandard: addISO,
+    updateISOStandard: updateISO,
+    deleteISOStandard: deleteISO,
+  } = useISOStandards();
 
-  const [advisors, setAdvisors] = useState<Advisor[]>(() => {
-    const saved = localStorage.getItem('advisors');
-    return saved ? JSON.parse(saved) : initialAdvisors;
-  });
+  const {
+    advisors,
+    setAdvisors,
+    loading: advisorsLoading,
+    addAdvisor: addAdv,
+    updateAdvisor: updateAdv,
+    deleteAdvisor: deleteAdv,
+  } = useAdvisors();
 
-  const [quotations, setQuotations] = useState<Quotation[]>(() => {
-    const saved = localStorage.getItem('quotations');
-    return saved ? JSON.parse(saved) : [];
-  });
+  const {
+    bankAccounts,
+    setBankAccounts,
+    loading: banksLoading,
+    addBankAccount: addBank,
+    updateBankAccount: updateBank,
+    deleteBankAccount: deleteBank,
+  } = useBankAccounts();
 
-  const [bankAccounts, setBankAccounts] = useState<BankAccount[]>(() => {
-    const saved = localStorage.getItem('bankAccounts');
-    return saved ? JSON.parse(saved) : initialBankAccounts;
-  });
+  const {
+    certificationSteps,
+    setCertificationSteps,
+    loading: stepsLoading,
+    addCertificationStep: addStep,
+    updateCertificationStep: updateStep,
+    deleteCertificationStep: deleteStep,
+    reorderCertificationSteps: reorderSteps,
+  } = useCertificationSteps();
 
-  const [certificationSteps, setCertificationSteps] = useState<CertificationStep[]>(() => {
-    const saved = localStorage.getItem('certificationSteps');
-    return saved ? JSON.parse(saved) : initialCertificationSteps;
-  });
+  const {
+    quotations,
+    setQuotations,
+    loading: quotationsLoading,
+    addQuotation: addQuot,
+    deleteQuotation: deleteQuot,
+    getNextQuotationCode: getNextCode,
+  } = useQuotations();
 
-  useEffect(() => {
-    localStorage.setItem('isoStandards', JSON.stringify(isoStandards));
-  }, [isoStandards]);
+  const loading = isoLoading || advisorsLoading || banksLoading || stepsLoading || quotationsLoading;
 
-  useEffect(() => {
-    localStorage.setItem('advisors', JSON.stringify(advisors));
-  }, [advisors]);
-
-  useEffect(() => {
-    localStorage.setItem('quotations', JSON.stringify(quotations));
-  }, [quotations]);
-
-  useEffect(() => {
-    localStorage.setItem('bankAccounts', JSON.stringify(bankAccounts));
-  }, [bankAccounts]);
-
-  useEffect(() => {
-    localStorage.setItem('certificationSteps', JSON.stringify(certificationSteps));
-  }, [certificationSteps]);
-
-  const addISOStandard = (iso: ISOStandard) => {
-    setIsoStandards((prev) => [...prev, iso]);
+  // Wrapper functions to match expected interface
+  const addISOStandard = async (iso: ISOStandard) => {
+    await addISO(iso);
   };
 
-  const updateISOStandard = (iso: ISOStandard) => {
-    setIsoStandards((prev) =>
-      prev.map((item) => (item.id === iso.id ? iso : item))
-    );
+  const updateISOStandard = async (iso: ISOStandard) => {
+    await updateISO(iso);
   };
 
-  const deleteISOStandard = (id: string) => {
-    setIsoStandards((prev) => prev.filter((item) => item.id !== id));
+  const deleteISOStandard = async (id: string) => {
+    await deleteISO(id);
   };
 
-  const addAdvisor = (advisor: Advisor) => {
-    setAdvisors((prev) => [...prev, advisor]);
+  const addAdvisor = async (advisor: Advisor) => {
+    await addAdv(advisor);
   };
 
-  const updateAdvisor = (advisor: Advisor) => {
-    setAdvisors((prev) =>
-      prev.map((item) => (item.id === advisor.id ? advisor : item))
-    );
+  const updateAdvisor = async (advisor: Advisor) => {
+    await updateAdv(advisor);
   };
 
-  const deleteAdvisor = (id: string) => {
-    setAdvisors((prev) => prev.filter((item) => item.id !== id));
+  const deleteAdvisor = async (id: string) => {
+    await deleteAdv(id);
   };
 
-  const addQuotation = (quotation: Quotation) => {
-    setQuotations((prev) => [...prev, quotation]);
+  const addQuotation = async (quotation: Quotation) => {
+    await addQuot(quotation);
   };
 
-  const getNextQuotationCode = (fecha: Date): string => {
-    const year = fecha.getFullYear();
-    const month = (fecha.getMonth() + 1).toString().padStart(2, '0');
-    const prefix = `COT-${year}-${month}-`;
-    const existingCodes = quotations
-      .filter((q) => q.code.startsWith(prefix))
-      .map((q) => parseInt(q.code.split('-').pop() || '0', 10));
-    const nextNumber = existingCodes.length > 0 ? Math.max(...existingCodes) + 1 : 1;
-    return `${prefix}${nextNumber.toString().padStart(5, '0')}`;
+  const deleteQuotation = async (id: string) => {
+    await deleteQuot(id);
   };
 
-  const addBankAccount = (bank: BankAccount) => {
-    setBankAccounts((prev) => [...prev, bank]);
+  const getNextQuotationCode = async (fecha: Date): Promise<string> => {
+    return await getNextCode(fecha);
   };
 
-  const updateBankAccount = (bank: BankAccount) => {
-    setBankAccounts((prev) =>
-      prev.map((item) => (item.id === bank.id ? bank : item))
-    );
+  const addBankAccount = async (bank: BankAccount) => {
+    await addBank(bank);
   };
 
-  const deleteBankAccount = (id: string) => {
-    setBankAccounts((prev) => prev.filter((item) => item.id !== id));
+  const updateBankAccount = async (bank: BankAccount) => {
+    await updateBank(bank);
   };
 
-  const addCertificationStep = (step: CertificationStep) => {
-    setCertificationSteps((prev) => [...prev, step]);
+  const deleteBankAccount = async (id: string) => {
+    await deleteBank(id);
   };
 
-  const updateCertificationStep = (step: CertificationStep) => {
-    setCertificationSteps((prev) =>
-      prev.map((item) => (item.id === step.id ? step : item))
-    );
+  const addCertificationStep = async (step: CertificationStep) => {
+    await addStep(step);
   };
 
-  const deleteCertificationStep = (id: string) => {
-    setCertificationSteps((prev) => {
-      const filtered = prev.filter((item) => item.id !== id);
-      // Reorder after deletion
-      return filtered.map((step, index) => ({ ...step, order: index + 1 }));
-    });
+  const updateCertificationStep = async (step: CertificationStep) => {
+    await updateStep(step);
   };
 
-  const reorderCertificationSteps = (steps: CertificationStep[]) => {
-    setCertificationSteps(steps);
+  const deleteCertificationStep = async (id: string) => {
+    await deleteStep(id);
+  };
+
+  const reorderCertificationSteps = async (steps: CertificationStep[]) => {
+    await reorderSteps(steps);
   };
 
   return (
@@ -178,6 +175,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         deleteAdvisor,
         addQuotation,
         getNextQuotationCode,
+        deleteQuotation,
         addBankAccount,
         updateBankAccount,
         deleteBankAccount,
@@ -185,6 +183,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         updateCertificationStep,
         deleteCertificationStep,
         reorderCertificationSteps,
+        loading,
       }}
     >
       {children}

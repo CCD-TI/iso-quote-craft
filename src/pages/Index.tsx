@@ -1,5 +1,5 @@
-import { useState, useRef } from 'react';
-import { Eye, Download, Save } from 'lucide-react';
+import { useState, useRef, useEffect } from 'react';
+import { Eye, Download, Save, Loader2 } from 'lucide-react';
 import Layout from '@/components/layout/Layout';
 import ClientDataForm from '@/components/quotation/ClientDataForm';
 import ISOSelectionTable from '@/components/quotation/ISOSelectionTable';
@@ -17,20 +17,24 @@ import { ClientData, SelectedISO } from '@/types/quotation';
 import { useApp } from '@/context/AppContext';
 import { useToast } from '@/hooks/use-toast';
 import { useModuleStyles } from '@/context/ModuleColorsContext';
+import { useAttachedFiles } from '@/hooks/useSupabaseData';
 import {
   downloadPdfArrayBuffer,
   downloadPdfBytes,
   generatePdfArrayBufferFromElement,
-  mergePdfArrayBufferWithDataUrl,
 } from '@/utils/pdfReport';
+import { PDFDocument } from 'pdf-lib';
 
 const Index = () => {
-  const { getNextQuotationCode, addQuotation } = useApp();
+  const { getNextQuotationCode, addQuotation, loading: appLoading } = useApp();
   const { toast } = useToast();
   const styles = useModuleStyles('generador');
+  const { attachedFile } = useAttachedFiles();
   const previewRef = useRef<HTMLDivElement>(null);
   const downloadRef = useRef<HTMLDivElement>(null);
   const [showPreview, setShowPreview] = useState(false);
+  const [quotationCode, setQuotationCode] = useState('');
+  const [isGeneratingCode, setIsGeneratingCode] = useState(true);
 
   const currentDate = new Date();
 
@@ -42,11 +46,27 @@ const Index = () => {
     correo: '',
     asesorId: '',
     fecha: currentDate,
-    codigo: getNextQuotationCode(currentDate),
+    codigo: '',
   });
 
   const [selectedISOs, setSelectedISOs] = useState<SelectedISO[]>([]);
   const [discount, setDiscount] = useState(0);
+
+  // Generate quotation code on mount
+  useEffect(() => {
+    const generateCode = async () => {
+      try {
+        const code = await getNextQuotationCode(currentDate);
+        setQuotationCode(code);
+        setClientData(prev => ({ ...prev, codigo: code }));
+      } catch (error) {
+        console.error('Error generating code:', error);
+      } finally {
+        setIsGeneratingCode(false);
+      }
+    };
+    generateCode();
+  }, []);
 
   const validateForm = (): boolean => {
     if (!clientData.ruc || clientData.ruc.length !== 11) {
@@ -105,6 +125,25 @@ const Index = () => {
     setShowPreview(true);
   };
 
+  const mergePdfBuffers = async (buffer1: ArrayBuffer, buffer2: ArrayBuffer): Promise<Uint8Array> => {
+    const pdf1 = await PDFDocument.load(buffer1);
+    const pdf2 = await PDFDocument.load(buffer2);
+    const mergedPdf = await PDFDocument.create();
+    
+    const pages1 = await mergedPdf.copyPages(pdf1, pdf1.getPageIndices());
+    const pages2 = await mergedPdf.copyPages(pdf2, pdf2.getPageIndices());
+    
+    pages1.forEach(page => mergedPdf.addPage(page));
+    pages2.forEach(page => mergedPdf.addPage(page));
+    
+    return await mergedPdf.save();
+  };
+
+  const fetchPdfAsArrayBuffer = async (url: string): Promise<ArrayBuffer> => {
+    const response = await fetch(url);
+    return await response.arrayBuffer();
+  };
+
   const saveQuotation = async () => {
     const subtotal = selectedISOs.reduce((sum, sel) => {
       let total = 0;
@@ -119,7 +158,7 @@ const Index = () => {
     const discountAmount = totalConIGV * (discount / 100);
     const finalTotal = totalConIGV - discountAmount;
 
-    addQuotation({
+    await addQuotation({
       id: Date.now().toString(),
       code: clientData.codigo,
       date: new Date().toISOString(),
@@ -159,10 +198,11 @@ const Index = () => {
 
     try {
       const quotationPdf = await generatePdfArrayBufferFromElement(el, options);
-      const attachedPdfDataUrl = localStorage.getItem('attachedPDF');
       
-      if (attachedPdfDataUrl) {
-        const mergedBytes = await mergePdfArrayBufferWithDataUrl(quotationPdf, attachedPdfDataUrl);
+      if (attachedFile?.url) {
+        // Fetch attached PDF from storage and merge
+        const attachedPdfBuffer = await fetchPdfAsArrayBuffer(attachedFile.url);
+        const mergedBytes = await mergePdfBuffers(quotationPdf, attachedPdfBuffer);
         downloadPdfBytes(mergedBytes, filename);
       } else {
         downloadPdfArrayBuffer(quotationPdf, filename);
@@ -197,7 +237,7 @@ const Index = () => {
         const discountAmount = totalConIGV * (discount / 100);
         const finalTotal = totalConIGV - discountAmount;
 
-        addQuotation({
+        await addQuotation({
           id: Date.now().toString(),
           code: clientData.codigo,
           date: new Date().toISOString(),
@@ -225,6 +265,16 @@ const Index = () => {
       }
     }, 300);
   };
+
+  if (appLoading || isGeneratingCode) {
+    return (
+      <Layout>
+        <div className="flex items-center justify-center h-64">
+          <Loader2 className="w-8 h-8 animate-spin" />
+        </div>
+      </Layout>
+    );
+  }
 
   return (
     <Layout>
