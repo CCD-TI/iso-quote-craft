@@ -9,6 +9,7 @@ import { useModuleStyles } from '@/context/ModuleColorsContext';
 import ModuleHeader from '@/components/ui/ModuleHeader';
 import { Upload, FileText, Trash2, Eye, Save, Loader2 } from 'lucide-react';
 import { useAttachedFiles } from '@/hooks/useSupabaseData';
+import DeleteWithCodeDialog from '@/components/ui/DeleteWithCodeDialog';
 
 const Archivos = () => {
   const { toast } = useToast();
@@ -18,6 +19,7 @@ const Archivos = () => {
   // Temporary state for uploaded file (before saving)
   const [tempFile, setTempFile] = useState<File | null>(null);
   const [tempFileUrl, setTempFileUrl] = useState<string | null>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [uploading, setUploading] = useState(false);
 
   const handlePDFUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -180,7 +182,7 @@ const Archivos = () => {
                   <Button
                     variant="destructive"
                     size="sm"
-                    onClick={handleRemovePDF}
+                    onClick={() => setDeleteDialogOpen(true)}
                     className="flex items-center gap-2"
                   >
                     <Trash2 className="w-4 h-4" />
@@ -240,6 +242,14 @@ const Archivos = () => {
           </CardContent>
         </Card>
       </div>
+
+      <DeleteWithCodeDialog
+        open={deleteDialogOpen}
+        onOpenChange={setDeleteDialogOpen}
+        onConfirm={handleRemovePDF}
+        title="¿Eliminar PDF adjunto?"
+        description="Esta acción no se puede deshacer. El PDF se eliminará permanentemente."
+      />
     </Layout>
   );
 };

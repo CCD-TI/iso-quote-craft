@@ -11,16 +11,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
+import DeleteWithCodeDialog from '@/components/ui/DeleteWithCodeDialog';
 import QuotationPreview from '@/components/quotation/QuotationPreview';
 import { Quotation } from '@/types/quotation';
 import { useToast } from '@/hooks/use-toast';
@@ -271,22 +262,13 @@ const Historial = () => {
         </DialogContent>
       </Dialog>
 
-      <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>¿Eliminar cotización?</AlertDialogTitle>
-            <AlertDialogDescription>
-              Esta acción no se puede deshacer. La cotización se eliminará permanentemente.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDelete} className="bg-destructive hover:bg-destructive/90">
-              Eliminar
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <DeleteWithCodeDialog
+        open={!!deleteId}
+        onOpenChange={(open) => !open && setDeleteId(null)}
+        onConfirm={handleDelete}
+        title="¿Eliminar cotización?"
+        description="Esta acción no se puede deshacer. La cotización se eliminará permanentemente."
+      />
     </Layout>
   );
 };

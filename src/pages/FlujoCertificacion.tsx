@@ -12,16 +12,7 @@ import {
   DialogTitle,
   DialogFooter,
 } from '@/components/ui/dialog';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
+import DeleteWithCodeDialog from '@/components/ui/DeleteWithCodeDialog';
 import { Plus, Edit, Trash2, GripVertical, CheckCircle2, GitBranch } from 'lucide-react';
 import { CertificationStep } from '@/types/quotation';
 
@@ -221,22 +212,13 @@ const FlujoCertificacion = () => {
         </Dialog>
 
         {/* Delete Confirmation Dialog */}
-        <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>¿Eliminar este paso?</AlertDialogTitle>
-              <AlertDialogDescription>
-                Esta acción no se puede deshacer. El paso será eliminado permanentemente del flujo de certificación.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>Cancelar</AlertDialogCancel>
-              <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground">
-                Eliminar
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
+        <DeleteWithCodeDialog
+          open={deleteDialogOpen}
+          onOpenChange={setDeleteDialogOpen}
+          onConfirm={handleDelete}
+          title="¿Eliminar este paso?"
+          description="Esta acción no se puede deshacer. El paso será eliminado permanentemente del flujo de certificación."
+        />
       </div>
     </Layout>
   );
