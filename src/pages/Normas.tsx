@@ -12,16 +12,7 @@ import {
   DialogTitle,
   DialogFooter,
 } from '@/components/ui/dialog';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
+import DeleteWithCodeDialog from '@/components/ui/DeleteWithCodeDialog';
 import { ISOStandard } from '@/types/quotation';
 import { useToast } from '@/hooks/use-toast';
 
@@ -283,22 +274,13 @@ const Normas = () => {
         </DialogContent>
       </Dialog>
 
-      <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>¿Eliminar norma ISO?</AlertDialogTitle>
-            <AlertDialogDescription>
-              Esta acción no se puede deshacer. La norma se eliminará permanentemente.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDelete} className="bg-destructive hover:bg-destructive/90">
-              Eliminar
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <DeleteWithCodeDialog
+        open={!!deleteId}
+        onOpenChange={(open) => !open && setDeleteId(null)}
+        onConfirm={handleDelete}
+        title="¿Eliminar norma ISO?"
+        description="Esta acción no se puede deshacer. La norma se eliminará permanentemente."
+      />
     </Layout>
   );
 };
