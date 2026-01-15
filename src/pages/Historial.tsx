@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useMemo } from 'react';
 import { Eye, Trash2, Search, FileText, Download } from 'lucide-react';
 import Layout from '@/components/layout/Layout';
 import { useApp } from '@/context/AppContext';
@@ -11,6 +11,13 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import DeleteWithCodeDialog from '@/components/ui/DeleteWithCodeDialog';
 import QuotationPreview from '@/components/quotation/QuotationPreview';
 import { Quotation } from '@/types/quotation';
@@ -23,20 +30,34 @@ import {
 } from '@/utils/pdfReport';
 
 const Historial = () => {
-  const { quotations, setQuotations } = useApp();
+  const { quotations, setQuotations, advisors } = useApp();
   const { toast } = useToast();
   const styles = useModuleStyles('historial');
   const [search, setSearch] = useState('');
+  const [advisorFilter, setAdvisorFilter] = useState<string>('all');
   const [selectedQuotation, setSelectedQuotation] = useState<Quotation | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [downloadQuotation, setDownloadQuotation] = useState<Quotation | null>(null);
   const downloadRef = useRef<HTMLDivElement>(null);
-  const filteredQuotations = quotations.filter(
-    (q) =>
-      q.code.toLowerCase().includes(search.toLowerCase()) ||
-      q.client.razonSocial.toLowerCase().includes(search.toLowerCase()) ||
-      q.client.ruc.includes(search)
-  );
+
+  const getAdvisorName = (asesorId: string) => {
+    const advisor = advisors.find((a) => a.id === asesorId);
+    return advisor?.name || 'Sin asignar';
+  };
+
+  const filteredQuotations = useMemo(() => {
+    return quotations.filter((q) => {
+      const matchesSearch =
+        q.code.toLowerCase().includes(search.toLowerCase()) ||
+        q.client.razonSocial.toLowerCase().includes(search.toLowerCase()) ||
+        q.client.ruc.includes(search) ||
+        getAdvisorName(q.client.asesorId).toLowerCase().includes(search.toLowerCase());
+      
+      const matchesAdvisor = advisorFilter === 'all' || q.client.asesorId === advisorFilter;
+      
+      return matchesSearch && matchesAdvisor;
+    });
+  }, [quotations, search, advisorFilter, advisors]);
 
   const formatCurrency = (amount: number) => {
     return `S/ ${amount.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
@@ -135,15 +156,30 @@ const Historial = () => {
             </span>
             <span>Historial de Cotizaciones</span>
           </div>
-          <div className="relative w-full md:w-80">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-            <Input
-              type="text"
-              placeholder="Buscar por código, RUC o razón social..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="pl-10"
-            />
+          <div className="flex flex-col md:flex-row gap-3 w-full md:w-auto">
+            <Select value={advisorFilter} onValueChange={setAdvisorFilter}>
+              <SelectTrigger className="w-full md:w-48">
+                <SelectValue placeholder="Filtrar por asesor" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todos los asesores</SelectItem>
+                {advisors.map((advisor) => (
+                  <SelectItem key={advisor.id} value={advisor.id}>
+                    {advisor.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <div className="relative w-full md:w-80">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <Input
+                type="text"
+                placeholder="Buscar por código, RUC, razón social o asesor..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="pl-10"
+              />
+            </div>
           </div>
         </div>
 
@@ -159,6 +195,7 @@ const Historial = () => {
                 <tr style={styles.tableHeaderStyle}>
                   <th className="text-left py-3 px-4 font-semibold rounded-tl-md">Código</th>
                   <th className="text-left py-3 px-4 font-semibold">Cliente</th>
+                  <th className="text-left py-3 px-4 font-semibold">Asesor</th>
                   <th className="text-left py-3 px-4 font-semibold">Fecha</th>
                   <th className="text-right py-3 px-4 font-semibold">Total</th>
                   <th className="text-center py-3 px-4 font-semibold">Estado</th>
@@ -182,6 +219,7 @@ const Historial = () => {
                         </div>
                       </div>
                     </td>
+                    <td className="py-3 px-4 text-sm">{getAdvisorName(quotation.client.asesorId)}</td>
                     <td className="py-3 px-4 text-sm">{formatDate(quotation.date)}</td>
                     <td className="py-3 px-4 text-right font-semibold">
                       {formatCurrency(quotation.total)}
