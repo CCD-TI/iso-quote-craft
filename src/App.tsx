@@ -13,6 +13,7 @@ import Normas from "./pages/Normas";
 import Bancos from "./pages/Bancos";
 import FlujoCertificacion from "./pages/FlujoCertificacion";
 import ConfiguracionColores from "./pages/ConfiguracionColores";
+import Administracion from "./pages/Administracion";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -34,6 +35,7 @@ const App = () => (
               <Route path="/bancos" element={<Bancos />} />
               <Route path="/flujo-certificacion" element={<FlujoCertificacion />} />
               <Route path="/configuracion-colores" element={<ConfiguracionColores />} />
+              <Route path="/administracion" element={<Administracion />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>
