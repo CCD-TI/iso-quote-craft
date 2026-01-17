@@ -1,9 +1,9 @@
-import { useApp } from '@/context/AppContext';
+import { useAuth } from '@/context/AuthContext';
 import { ClientData } from '@/types/quotation';
 import { ModuleColors } from '@/context/ModuleColorsContext';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { CalendarIcon } from 'lucide-react';
+import { CalendarIcon, User } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
@@ -12,13 +12,8 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+import { useEffect } from 'react';
+import { useApp } from '@/context/AppContext';
 
 interface ClientDataFormProps {
   data: ClientData;
@@ -27,7 +22,15 @@ interface ClientDataFormProps {
 }
 
 const ClientDataForm = ({ data, onChange, moduleColors }: ClientDataFormProps) => {
-  const { advisors, getNextQuotationCode } = useApp();
+  const { advisor } = useAuth();
+  const { getNextQuotationCode } = useApp();
+
+  // Auto-set advisor when component mounts or advisor changes
+  useEffect(() => {
+    if (advisor && data.asesorId !== advisor.id) {
+      onChange({ ...data, asesorId: advisor.id });
+    }
+  }, [advisor]);
 
   const handleChange = async (field: keyof ClientData, value: string | Date) => {
     const newData = { ...data, [field]: value };
@@ -123,23 +126,15 @@ const ClientDataForm = ({ data, onChange, moduleColors }: ClientDataFormProps) =
           />
         </div>
 
+        {/* Asesor - Now shown as read-only with logged in advisor */}
         <div>
-          <label className="form-label form-label-required">Asesor</label>
-          <Select
-            value={data.asesorId}
-            onValueChange={(value) => handleChange('asesorId', value)}
-          >
-            <SelectTrigger className="input-corporate">
-              <SelectValue placeholder="Seleccione asesor" />
-            </SelectTrigger>
-            <SelectContent>
-              {advisors.map((advisor) => (
-                <SelectItem key={advisor.id} value={advisor.id}>
-                  {advisor.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <label className="form-label">Asesor</label>
+          <div className="input-corporate flex items-center gap-2 bg-muted/50">
+            <User className="w-4 h-4 text-muted-foreground" />
+            <span className="text-foreground font-medium">
+              {advisor?.name || 'Sin asesor asignado'}
+            </span>
+          </div>
         </div>
 
         <div>

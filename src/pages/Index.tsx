@@ -15,6 +15,7 @@ import {
 } from '@/components/ui/dialog';
 import { ClientData, SelectedISO } from '@/types/quotation';
 import { useApp } from '@/context/AppContext';
+import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { useModuleStyles } from '@/context/ModuleColorsContext';
 import { useAttachedFiles } from '@/hooks/useSupabaseData';
@@ -27,6 +28,7 @@ import { PDFDocument } from 'pdf-lib';
 
 const Index = () => {
   const { getNextQuotationCode, addQuotation, loading: appLoading } = useApp();
+  const { advisor } = useAuth();
   const { toast } = useToast();
   const styles = useModuleStyles('generador');
   const { attachedFile } = useAttachedFiles();
@@ -44,7 +46,7 @@ const Index = () => {
     representante: '',
     celular: '',
     correo: '',
-    asesorId: '',
+    asesorId: advisor?.id || '',
     fecha: currentDate,
     codigo: '',
   });
@@ -101,10 +103,10 @@ const Index = () => {
       });
       return false;
     }
-    if (!clientData.asesorId) {
+    if (!clientData.asesorId && !advisor) {
       toast({
         title: 'Error de validación',
-        description: 'Debe seleccionar un asesor',
+        description: 'No hay asesor asignado. Por favor, cierre sesión e inicie de nuevo.',
         variant: 'destructive',
       });
       return false;
