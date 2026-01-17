@@ -1,16 +1,20 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, User, Lock, LogIn } from 'lucide-react';
+import { Loader2, User, Lock, LogIn, Eye, EyeOff, AlertCircle } from 'lucide-react';
 import logoCcd from '@/assets/logo-ccd.jpg';
 
 const Auth = () => {
   const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  
+  // Use ref for password to avoid it being visible in React DevTools
+  const passwordRef = useRef<HTMLInputElement>(null);
   
   const { signIn, advisor } = useAuth();
   const navigate = useNavigate();
@@ -22,26 +26,47 @@ const Auth = () => {
     }
   }, [advisor, navigate]);
 
+  // Clear error when user types
+  useEffect(() => {
+    if (errorMessage) {
+      setErrorMessage(null);
+    }
+  }, [username]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setErrorMessage(null);
+    
+    const password = passwordRef.current?.value || '';
     
     if (!username.trim() || !password.trim()) {
-      toast({
-        title: 'Error',
-        description: 'Ingrese usuario y contraseña',
-        variant: 'destructive',
-      });
+      setErrorMessage('Ingrese usuario y contraseña');
       return;
     }
 
     setLoading(true);
 
-    const { error } = await signIn(username.trim(), password);
+    const { error } = await signIn(username.trim().toLowerCase(), password);
+    
+    // Clear password immediately after use for security
+    if (passwordRef.current) {
+      passwordRef.current.value = '';
+    }
     
     if (error) {
+      // Show specific error messages
+      if (error.includes('Usuario no encontrado')) {
+        setErrorMessage('Usuario no encontrado. Verifique su nombre de usuario.');
+      } else if (error.includes('Contraseña incorrecta')) {
+        setErrorMessage('Contraseña incorrecta. Intente nuevamente.');
+      } else if (error.includes('no tiene contraseña')) {
+        setErrorMessage('Este usuario no tiene contraseña configurada. Contacte al administrador.');
+      } else {
+        setErrorMessage(error);
+      }
       toast({
         title: 'Error de inicio de sesión',
-        description: error,
+        description: 'Credenciales inválidas',
         variant: 'destructive',
       });
     } else {
@@ -53,6 +78,13 @@ const Auth = () => {
     }
 
     setLoading(false);
+  };
+
+  const clearPasswordOnFocus = () => {
+    // Clear any error when focusing on password
+    if (errorMessage) {
+      setErrorMessage(null);
+    }
   };
 
   return (
@@ -74,8 +106,16 @@ const Auth = () => {
             </p>
           </div>
 
+          {/* Error Banner */}
+          {errorMessage && (
+            <div className="mx-6 mt-4 p-3 bg-destructive/10 border border-destructive/30 rounded-lg flex items-start gap-2">
+              <AlertCircle className="h-5 w-5 text-destructive shrink-0 mt-0.5" />
+              <p className="text-sm text-destructive font-medium">{errorMessage}</p>
+            </div>
+          )}
+
           {/* Form */}
-          <form onSubmit={handleSubmit} className="p-6 space-y-4">
+          <form onSubmit={handleSubmit} className="p-6 space-y-4" autoComplete="off">
             <div>
               <label className="form-label form-label-required">Usuario</label>
               <div className="relative">
@@ -87,7 +127,8 @@ const Auth = () => {
                   placeholder="Ingrese su usuario"
                   className="pl-10"
                   disabled={loading}
-                  autoComplete="username"
+                  autoComplete="off"
+                  spellCheck={false}
                 />
               </div>
             </div>
@@ -97,14 +138,26 @@ const Auth = () => {
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  ref={passwordRef}
+                  type={showPassword ? 'text' : 'password'}
                   placeholder="••••••••"
-                  className="pl-10"
+                  className="pl-10 pr-10"
                   disabled={loading}
-                  autoComplete="current-password"
+                  autoComplete="new-password"
+                  onFocus={clearPasswordOnFocus}
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                  tabIndex={-1}
+                >
+                  {showPassword ? (
+                    <EyeOff className="h-4 w-4" />
+                  ) : (
+                    <Eye className="h-4 w-4" />
+                  )}
+                </button>
               </div>
             </div>
 
