@@ -53,6 +53,13 @@ const Index = () => {
 
   const [selectedISOs, setSelectedISOs] = useState<SelectedISO[]>([]);
   const [discount, setDiscount] = useState(0);
+  const [includeIGV, setIncludeIGV] = useState(true);
+  const [implementation, setImplementation] = useState({
+    enabled: false,
+    companySize: 'pequeña' as 'pequeña' | 'mediana' | 'grande',
+    unitPrice: 3500,
+    quantity: 1,
+  });
 
   // Generate quotation code on mount
   useEffect(() => {
@@ -155,10 +162,13 @@ const Index = () => {
       return sum + total;
     }, 0);
 
-    const igv = subtotal * 0.18;
-    const totalConIGV = subtotal + igv;
-    const discountAmount = totalConIGV * (discount / 100);
-    const finalTotal = totalConIGV - discountAmount;
+    const igv = includeIGV ? subtotal * 0.18 : 0;
+    const totalCertificacion = subtotal + igv;
+    const implementationTotal = implementation.enabled 
+      ? implementation.unitPrice * implementation.quantity 
+      : 0;
+    const totalGeneral = totalCertificacion + implementationTotal;
+    const finalTotal = totalGeneral - discount;
 
     await addQuotation({
       id: Date.now().toString(),
@@ -234,10 +244,13 @@ const Index = () => {
           return sum + total;
         }, 0);
 
-        const igv = subtotal * 0.18;
-        const totalConIGV = subtotal + igv;
-        const discountAmount = totalConIGV * (discount / 100);
-        const finalTotal = totalConIGV - discountAmount;
+        const igv = includeIGV ? subtotal * 0.18 : 0;
+        const totalCertificacion = subtotal + igv;
+        const implementationTotal = implementation.enabled 
+          ? implementation.unitPrice * implementation.quantity 
+          : 0;
+        const totalGeneral = totalCertificacion + implementationTotal;
+        const finalTotal = totalGeneral - discount;
 
         await addQuotation({
           id: Date.now().toString(),
@@ -306,6 +319,10 @@ const Index = () => {
           discount={discount}
           onDiscountChange={setDiscount}
           moduleColors={styles.colors}
+          includeIGV={includeIGV}
+          onIncludeIGVChange={setIncludeIGV}
+          implementation={implementation}
+          onImplementationChange={setImplementation}
         />
         
         {/* Preview Button at the bottom */}
