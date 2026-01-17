@@ -2,6 +2,7 @@ import { useState, useRef, useEffect, useMemo } from 'react';
 import { Eye, Trash2, Search, FileText, Download, Edit, Settings } from 'lucide-react';
 import Layout from '@/components/layout/Layout';
 import { useApp } from '@/context/AppContext';
+import { useAuth } from '@/context/AuthContext';
 import { useModuleStyles } from '@/context/ModuleColorsContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -31,9 +32,13 @@ import {
 } from '@/utils/pdfReport';
 
 const Historial = () => {
-  const { quotations, setQuotations, advisors } = useApp();
+  const { quotations, deleteQuotation, advisors } = useApp();
+  const { advisor } = useAuth();
   const { toast } = useToast();
   const styles = useModuleStyles('historial');
+  
+  // Solo el usuario kevinccd puede eliminar cotizaciones permanentemente
+  const canDelete = advisor?.username === 'kevinccd';
   const [search, setSearch] = useState('');
   const [advisorFilter, setAdvisorFilter] = useState<string>('all');
   const [selectedQuotation, setSelectedQuotation] = useState<Quotation | null>(null);
@@ -88,13 +93,21 @@ const Historial = () => {
     });
   };
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
     if (deleteId) {
-      setQuotations((prev) => prev.filter((q) => q.id !== deleteId));
-      toast({
-        title: 'Cotización eliminada',
-        description: 'La cotización se ha eliminado correctamente',
-      });
+      try {
+        await deleteQuotation(deleteId);
+        toast({
+          title: 'Cotización eliminada',
+          description: 'La cotización se ha eliminado permanentemente de la base de datos',
+        });
+      } catch (error) {
+        toast({
+          title: 'Error',
+          description: 'No se pudo eliminar la cotización',
+          variant: 'destructive',
+        });
+      }
       setDeleteId(null);
     }
   };
@@ -332,15 +345,17 @@ const Historial = () => {
                         >
                           <Download className="w-4 h-4" />
                         </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => setDeleteId(quotation.id)}
-                          className="text-destructive hover:text-destructive"
-                          title="Eliminar"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
+                        {canDelete && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setDeleteId(quotation.id)}
+                            className="text-destructive hover:text-destructive"
+                            title="Eliminar permanentemente"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        )}
                       </div>
                     </td>
                   </tr>
