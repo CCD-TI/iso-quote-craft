@@ -85,6 +85,7 @@ Deno.serve(async (req) => {
             email: advisor.email,
             phone: advisor.phone,
             username: advisor.username,
+            isAdmin: advisor.is_admin || false,
           },
         }),
         { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }

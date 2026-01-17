@@ -8,6 +8,7 @@ interface AdvisorSession {
   email: string;
   phone: string;
   username: string;
+  isAdmin: boolean;
 }
 
 interface AuthContextType {

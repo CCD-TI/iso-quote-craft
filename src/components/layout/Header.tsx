@@ -15,12 +15,15 @@ const Header = () => {
   const location = useLocation();
   const { advisor, signOut } = useAuth();
 
+  // Navigation items - some are admin only
   const navItems = [
-    { path: '/', label: 'Generador', icon: FileText },
-    { path: '/historial', label: 'Historial', icon: History },
-    { path: '/administracion', label: 'Administración', icon: Shield },
-    { path: '/configuracion-colores', label: 'Colores', icon: Palette },
+    { path: '/', label: 'Generador', icon: FileText, adminOnly: false },
+    { path: '/historial', label: 'Historial', icon: History, adminOnly: false },
+    { path: '/administracion', label: 'Administración', icon: Shield, adminOnly: true },
+    { path: '/configuracion-colores', label: 'Colores', icon: Palette, adminOnly: true },
   ];
+
+  const visibleNavItems = navItems.filter(item => !item.adminOnly || advisor?.isAdmin);
 
   const handleSignOut = () => {
     signOut();
@@ -46,7 +49,7 @@ const Header = () => {
 
           <div className="flex items-center gap-4">
             <nav className="hidden md:flex items-center gap-1">
-              {navItems.map((item) => {
+              {visibleNavItems.map((item) => {
                 const Icon = item.icon;
                 const isActive = location.pathname === item.path;
                 return (
