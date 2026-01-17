@@ -613,6 +613,69 @@ export const useQuotations = () => {
     return newQuotation;
   };
 
+  const updateQuotation = async (quotation: Quotation) => {
+    // Update quotation
+    const { error: quotationError } = await supabase
+      .from('quotations')
+      .update({
+        code: quotation.code,
+        date: quotation.date,
+        client_ruc: quotation.client.ruc,
+        client_razon_social: quotation.client.razonSocial,
+        client_representante: quotation.client.representante,
+        client_celular: quotation.client.celular,
+        client_correo: quotation.client.correo,
+        advisor_id: quotation.client.asesorId || null,
+        subtotal: quotation.subtotal,
+        igv: quotation.igv,
+        discount: quotation.discount,
+        total: quotation.total,
+        status: quotation.status,
+        include_igv: quotation.includeIGV ?? true,
+        implementation_enabled: quotation.implementation?.enabled ?? false,
+        implementation_company_size: quotation.implementation?.companySize ?? 'pequeña',
+        implementation_unit_price: quotation.implementation?.unitPrice ?? 0,
+        implementation_quantity: quotation.implementation?.quantity ?? 1,
+        implementation_total: quotation.implementationTotal ?? 0,
+      })
+      .eq('id', quotation.id);
+    
+    if (quotationError) {
+      console.error('Error updating quotation:', quotationError);
+      throw quotationError;
+    }
+
+    // Delete existing ISOs and re-insert
+    await supabase
+      .from('quotation_isos')
+      .delete()
+      .eq('quotation_id', quotation.id);
+
+    // Insert updated quotation ISOs
+    if (quotation.selectedISOs.length > 0) {
+      const isosToInsert = quotation.selectedISOs.map(iso => ({
+        quotation_id: quotation.id,
+        iso_id: iso.isoId,
+        certification: iso.certification,
+        certification_price: iso.certificationPrice,
+        follow_up: iso.followUp,
+        follow_up_price: iso.followUpPrice,
+        recertification: iso.recertification,
+        recertification_price: iso.recertificationPrice,
+      }));
+
+      const { error: isosError } = await supabase
+        .from('quotation_isos')
+        .insert(isosToInsert);
+      
+      if (isosError) {
+        console.error('Error updating quotation ISOs:', isosError);
+      }
+    }
+    
+    setQuotations(prev => prev.map(q => q.id === quotation.id ? quotation : q));
+  };
+
   const deleteQuotation = async (id: string) => {
     const { error } = await supabase
       .from('quotations')
@@ -648,7 +711,7 @@ export const useQuotations = () => {
     fetchQuotations();
   }, []);
 
-  return { quotations, setQuotations, loading, addQuotation, deleteQuotation, getNextQuotationCode, refetch: fetchQuotations };
+  return { quotations, setQuotations, loading, addQuotation, updateQuotation, deleteQuotation, getNextQuotationCode, refetch: fetchQuotations };
 };
 
 // Attached Files Hook
