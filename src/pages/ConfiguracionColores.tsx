@@ -1,9 +1,10 @@
+import { useNavigate } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Palette, Save, RotateCcw, FileText, History, Users, Settings, Building2, GitBranch, Eye, Sparkles, LucideIcon } from 'lucide-react';
+import { Palette, Save, RotateCcw, FileText, History, Users, Settings, Building2, GitBranch, Eye, Sparkles, LucideIcon, Upload } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useModuleColors, themePresets } from '@/context/ModuleColorsContext';
 
@@ -18,6 +19,7 @@ const iconMap: Record<string, LucideIcon> = {
 };
 
 const ConfiguracionColores = () => {
+  const navigate = useNavigate();
   const { toast } = useToast();
   const { 
     moduleColors, 
@@ -80,6 +82,42 @@ const ConfiguracionColores = () => {
             </Button>
           </div>
         </div>
+
+        {/* Admin Quick Access */}
+        <Card className="border-primary/20 bg-primary/5">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-lg flex items-center gap-2">
+              <Settings className="w-5 h-5 text-primary" />
+              Accesos de Administración
+            </CardTitle>
+            <CardDescription>Gestiona los módulos del sistema</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+              {[
+                { path: '/archivos', label: 'Archivos', icon: Upload },
+                { path: '/asesores', label: 'Asesores', icon: Users },
+                { path: '/normas', label: 'Normas ISO', icon: Settings },
+                { path: '/bancos', label: 'Bancos', icon: Building2 },
+                { path: '/flujo-certificacion', label: 'Flujo', icon: GitBranch },
+              ].map((option) => {
+                const Icon = option.icon;
+                return (
+                  <button
+                    key={option.path}
+                    onClick={() => navigate(option.path)}
+                    className="flex flex-col items-center gap-2 p-4 rounded-lg border border-border hover:border-primary hover:bg-primary/10 transition-all group"
+                  >
+                    <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
+                      <Icon className="w-5 h-5 text-primary" />
+                    </div>
+                    <span className="text-sm font-medium">{option.label}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Theme Presets */}
         <Card>
