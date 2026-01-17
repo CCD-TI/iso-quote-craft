@@ -26,6 +26,7 @@ interface AppContextType {
   updateAdvisor: (advisor: Advisor) => Promise<void>;
   deleteAdvisor: (id: string) => Promise<void>;
   addQuotation: (quotation: Quotation) => Promise<void>;
+  updateQuotation: (quotation: Quotation) => Promise<void>;
   getNextQuotationCode: (fecha: Date) => Promise<string>;
   deleteQuotation: (id: string) => Promise<void>;
   addBankAccount: (bank: BankAccount) => Promise<void>;
@@ -83,6 +84,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setQuotations,
     loading: quotationsLoading,
     addQuotation: addQuot,
+    updateQuotation: updateQuot,
     deleteQuotation: deleteQuot,
     getNextQuotationCode: getNextCode,
   } = useQuotations();
@@ -116,6 +118,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const addQuotation = async (quotation: Quotation) => {
     await addQuot(quotation);
+  };
+
+  const updateQuotation = async (quotation: Quotation) => {
+    await updateQuot(quotation);
   };
 
   const deleteQuotation = async (id: string) => {
@@ -174,6 +180,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         updateAdvisor,
         deleteAdvisor,
         addQuotation,
+        updateQuotation,
         getNextQuotationCode,
         deleteQuotation,
         addBankAccount,

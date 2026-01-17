@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useMemo } from 'react';
-import { Eye, Trash2, Search, FileText, Download } from 'lucide-react';
+import { Eye, Trash2, Search, FileText, Download, Edit, Settings } from 'lucide-react';
 import Layout from '@/components/layout/Layout';
 import { useApp } from '@/context/AppContext';
 import { useModuleStyles } from '@/context/ModuleColorsContext';
@@ -20,6 +20,7 @@ import {
 } from '@/components/ui/select';
 import DeleteWithCodeDialog from '@/components/ui/DeleteWithCodeDialog';
 import QuotationPreview from '@/components/quotation/QuotationPreview';
+import QuotationEditDialog from '@/components/quotation/QuotationEditDialog';
 import { Quotation } from '@/types/quotation';
 import { useToast } from '@/hooks/use-toast';
 import {
@@ -36,6 +37,7 @@ const Historial = () => {
   const [search, setSearch] = useState('');
   const [advisorFilter, setAdvisorFilter] = useState<string>('all');
   const [selectedQuotation, setSelectedQuotation] = useState<Quotation | null>(null);
+  const [editQuotation, setEditQuotation] = useState<Quotation | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [downloadQuotation, setDownloadQuotation] = useState<Quotation | null>(null);
   const downloadRef = useRef<HTMLDivElement>(null);
@@ -58,6 +60,21 @@ const Historial = () => {
       return matchesSearch && matchesAdvisor;
     });
   }, [quotations, search, advisorFilter, advisors]);
+
+  // Estadísticas de implementación
+  const implementationStats = useMemo(() => {
+    const withImplementation = quotations.filter(q => q.implementation?.enabled).length;
+    const totalImplementationValue = quotations
+      .filter(q => q.implementation?.enabled)
+      .reduce((sum, q) => sum + (q.implementationTotal || 0), 0);
+    
+    return {
+      total: quotations.length,
+      withImplementation,
+      withoutImplementation: quotations.length - withImplementation,
+      totalValue: totalImplementationValue,
+    };
+  }, [quotations]);
 
   const formatCurrency = (amount: number) => {
     return `S/ ${amount.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
@@ -127,7 +144,7 @@ const Historial = () => {
   }, [downloadQuotation, toast]);
 
   const getStatusBadge = (status: string) => {
-    const styles: Record<string, string> = {
+    const badgeStyles: Record<string, string> = {
       draft: 'bg-muted text-muted-foreground',
       sent: 'bg-primary/10 text-primary',
       approved: 'bg-success/10 text-success',
@@ -140,7 +157,7 @@ const Historial = () => {
       rejected: 'Rechazada',
     };
     return (
-      <span className={`px-2 py-1 rounded-full text-xs font-medium ${styles[status]}`}>
+      <span className={`px-2 py-1 rounded-full text-xs font-medium ${badgeStyles[status]}`}>
         {labels[status]}
       </span>
     );
@@ -148,6 +165,54 @@ const Historial = () => {
 
   return (
     <Layout>
+      {/* Resumen de Implementación */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+        <div className="card-corporate p-4">
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-lg bg-primary/10">
+              <FileText className="w-5 h-5 text-primary" />
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground">Total Cotizaciones</p>
+              <p className="text-2xl font-bold">{implementationStats.total}</p>
+            </div>
+          </div>
+        </div>
+        <div className="card-corporate p-4">
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-lg bg-success/10">
+              <Settings className="w-5 h-5 text-success" />
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground">Con Implementación</p>
+              <p className="text-2xl font-bold">{implementationStats.withImplementation}</p>
+            </div>
+          </div>
+        </div>
+        <div className="card-corporate p-4">
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-lg bg-muted">
+              <FileText className="w-5 h-5 text-muted-foreground" />
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground">Sin Implementación</p>
+              <p className="text-2xl font-bold">{implementationStats.withoutImplementation}</p>
+            </div>
+          </div>
+        </div>
+        <div className="card-corporate p-4">
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-lg bg-primary/10">
+              <FileText className="w-5 h-5 text-primary" />
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground">Valor Implementación</p>
+              <p className="text-xl font-bold">{formatCurrency(implementationStats.totalValue)}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div className="card-corporate">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
           <div className="section-title mb-0">
@@ -197,6 +262,7 @@ const Historial = () => {
                   <th className="text-left py-3 px-4 font-semibold">Cliente</th>
                   <th className="text-left py-3 px-4 font-semibold">Asesor</th>
                   <th className="text-left py-3 px-4 font-semibold">Fecha</th>
+                  <th className="text-center py-3 px-4 font-semibold">Impl.</th>
                   <th className="text-right py-3 px-4 font-semibold">Total</th>
                   <th className="text-center py-3 px-4 font-semibold">Estado</th>
                   <th className="text-center py-3 px-4 font-semibold rounded-tr-md">Acciones</th>
@@ -221,6 +287,17 @@ const Historial = () => {
                     </td>
                     <td className="py-3 px-4 text-sm">{getAdvisorName(quotation.client.asesorId)}</td>
                     <td className="py-3 px-4 text-sm">{formatDate(quotation.date)}</td>
+                    <td className="py-3 px-4 text-center">
+                      {quotation.implementation?.enabled ? (
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-success/10 text-success">
+                          Sí
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-muted text-muted-foreground">
+                          No
+                        </span>
+                      )}
+                    </td>
                     <td className="py-3 px-4 text-right font-semibold">
                       {formatCurrency(quotation.total)}
                     </td>
@@ -228,7 +305,7 @@ const Historial = () => {
                       {getStatusBadge(quotation.status)}
                     </td>
                     <td className="py-3 px-4">
-                      <div className="flex items-center justify-center gap-2">
+                      <div className="flex items-center justify-center gap-1">
                         <Button
                           variant="ghost"
                           size="sm"
@@ -236,6 +313,15 @@ const Historial = () => {
                           title="Ver cotización"
                         >
                           <Eye className="w-4 h-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setEditQuotation(quotation)}
+                          title="Editar cotización"
+                          className="text-primary hover:text-primary"
+                        >
+                          <Edit className="w-4 h-4" />
                         </Button>
                         <Button
                           variant="ghost"
@@ -276,6 +362,8 @@ const Historial = () => {
               selectedISOs={selectedQuotation.selectedISOs}
               discount={selectedQuotation.discount}
               moduleColors={styles.colors}
+              includeIGV={selectedQuotation.includeIGV}
+              implementation={selectedQuotation.implementation}
             />
           )}
         </DialogContent>
@@ -295,10 +383,20 @@ const Historial = () => {
               discount={downloadQuotation.discount}
               moduleColors={styles.colors}
               showAttachment={false}
+              includeIGV={downloadQuotation.includeIGV}
+              implementation={downloadQuotation.implementation}
             />
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Edit Dialog */}
+      <QuotationEditDialog
+        quotation={editQuotation}
+        open={!!editQuotation}
+        onOpenChange={(open) => !open && setEditQuotation(null)}
+        onSave={() => setEditQuotation(null)}
+      />
 
       <DeleteWithCodeDialog
         open={!!deleteId}
