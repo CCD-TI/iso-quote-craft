@@ -20,7 +20,7 @@ const Header = () => {
     { path: '/', label: 'Generador', icon: FileText, adminOnly: false },
     { path: '/historial', label: 'Historial', icon: History, adminOnly: false },
     { path: '/administracion', label: 'Administración', icon: Shield, adminOnly: true },
-    { path: '/configuracion-colores', label: 'Colores', icon: Palette, adminOnly: true },
+    { path: '/configuracion-colores', label: 'Colores', icon: Palette, adminOnly: false },
   ];
 
   const visibleNavItems = navItems.filter(item => !item.adminOnly || advisor?.isAdmin);
