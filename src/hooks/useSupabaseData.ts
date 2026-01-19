@@ -677,16 +677,27 @@ export const useQuotations = () => {
   };
 
   const deleteQuotation = async (id: string) => {
+    // Primero eliminar relaciones para evitar errores por llaves foráneas
+    const { error: isosError } = await supabase
+      .from('quotation_isos')
+      .delete()
+      .eq('quotation_id', id);
+
+    if (isosError) {
+      console.error('Error deleting quotation ISOs:', isosError);
+      throw isosError;
+    }
+
     const { error } = await supabase
       .from('quotations')
       .delete()
       .eq('id', id);
-    
+
     if (error) {
       console.error('Error deleting quotation:', error);
       throw error;
     }
-    
+
     setQuotations(prev => prev.filter(q => q.id !== id));
   };
 
