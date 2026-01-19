@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useMemo } from 'react';
-import { Eye, Trash2, Search, FileText, Download, Edit, Settings, CheckCircle, DollarSign, TrendingUp } from 'lucide-react';
+import { Eye, Trash2, Search, FileText, Download, Edit, Settings, CheckCircle, DollarSign, TrendingUp, Filter } from 'lucide-react';
 import Layout from '@/components/layout/Layout';
 import { useApp } from '@/context/AppContext';
 import { useAuth } from '@/context/AuthContext';
@@ -31,8 +31,15 @@ import {
   mergePdfArrayBufferWithDataUrl,
 } from '@/utils/pdfReport';
 
+const statusOptions = [
+  { value: 'draft', label: 'Borrador' },
+  { value: 'sent', label: 'Enviada' },
+  { value: 'approved', label: 'Aprobada' },
+  { value: 'rejected', label: 'Rechazada' },
+];
+
 const Historial = () => {
-  const { quotations, deleteQuotation, advisors } = useApp();
+  const { quotations, deleteQuotation, updateQuotation, advisors } = useApp();
   const { advisor } = useAuth();
   const { toast } = useToast();
   const styles = useModuleStyles('historial');
@@ -41,6 +48,7 @@ const Historial = () => {
   const canDelete = advisor?.username === 'kevinccd';
   const [search, setSearch] = useState('');
   const [advisorFilter, setAdvisorFilter] = useState<string>('all');
+  const [statusFilter, setStatusFilter] = useState<string>('all');
   const [selectedQuotation, setSelectedQuotation] = useState<Quotation | null>(null);
   const [editQuotation, setEditQuotation] = useState<Quotation | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
@@ -61,38 +69,47 @@ const Historial = () => {
         getAdvisorName(q.client.asesorId).toLowerCase().includes(search.toLowerCase());
       
       const matchesAdvisor = advisorFilter === 'all' || q.client.asesorId === advisorFilter;
+      const matchesStatus = statusFilter === 'all' || q.status === statusFilter;
       
-      return matchesSearch && matchesAdvisor;
+      return matchesSearch && matchesAdvisor && matchesStatus;
     });
-  }, [quotations, search, advisorFilter, advisors]);
+  }, [quotations, search, advisorFilter, statusFilter, advisors]);
 
-  // Estadísticas de implementación
+  // Estadísticas de implementación (filtradas por asesor)
   const implementationStats = useMemo(() => {
-    const withImplementation = quotations.filter(q => q.implementation?.enabled).length;
-    const totalImplementationValue = quotations
+    const filtered = advisorFilter === 'all' 
+      ? quotations 
+      : quotations.filter(q => q.client.asesorId === advisorFilter);
+    
+    const withImplementation = filtered.filter(q => q.implementation?.enabled).length;
+    const totalImplementationValue = filtered
       .filter(q => q.implementation?.enabled)
       .reduce((sum, q) => sum + (q.implementationTotal || 0), 0);
     
     return {
-      total: quotations.length,
+      total: filtered.length,
       withImplementation,
-      withoutImplementation: quotations.length - withImplementation,
+      withoutImplementation: filtered.length - withImplementation,
       totalValue: totalImplementationValue,
     };
-  }, [quotations]);
+  }, [quotations, advisorFilter]);
 
-  // Estadísticas de cotizaciones aprobadas/vendidas
+  // Estadísticas de cotizaciones aprobadas/vendidas (filtradas por asesor)
   const approvedStats = useMemo(() => {
-    const approvedQuotations = quotations.filter(q => q.status === 'approved');
+    const filtered = advisorFilter === 'all' 
+      ? quotations 
+      : quotations.filter(q => q.client.asesorId === advisorFilter);
+    
+    const approvedQuotations = filtered.filter(q => q.status === 'approved');
     const totalApprovedValue = approvedQuotations.reduce((sum, q) => sum + q.total, 0);
-    const totalQuotedValue = quotations.reduce((sum, q) => sum + q.total, 0);
+    const totalQuotedValue = filtered.reduce((sum, q) => sum + q.total, 0);
     
     return {
       count: approvedQuotations.length,
       totalValue: totalApprovedValue,
       totalQuotedValue,
     };
-  }, [quotations]);
+  }, [quotations, advisorFilter]);
 
   const formatCurrency = (amount: number) => {
     return `S/ ${amount.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
@@ -169,24 +186,30 @@ const Historial = () => {
     return () => clearTimeout(timer);
   }, [downloadQuotation, toast]);
 
-  const getStatusBadge = (status: string) => {
-    const badgeStyles: Record<string, string> = {
-      draft: 'bg-muted text-muted-foreground',
-      sent: 'bg-primary/10 text-primary',
-      approved: 'bg-success/10 text-success',
-      rejected: 'bg-destructive/10 text-destructive',
+  const handleStatusChange = async (quotation: Quotation, newStatus: 'draft' | 'sent' | 'approved' | 'rejected') => {
+    try {
+      await updateQuotation({ ...quotation, status: newStatus });
+      toast({
+        title: 'Estado actualizado',
+        description: `La cotización ${quotation.code} ahora está ${statusOptions.find(s => s.value === newStatus)?.label}`,
+      });
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'No se pudo actualizar el estado',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const getStatusSelectStyles = (status: string) => {
+    const styles: Record<string, string> = {
+      draft: 'border-muted-foreground/30',
+      sent: 'border-primary/50',
+      approved: 'border-success/50',
+      rejected: 'border-destructive/50',
     };
-    const labels: Record<string, string> = {
-      draft: 'Borrador',
-      sent: 'Enviada',
-      approved: 'Aprobada',
-      rejected: 'Rechazada',
-    };
-    return (
-      <span className={`px-2 py-1 rounded-full text-xs font-medium ${badgeStyles[status]}`}>
-        {labels[status]}
-      </span>
-    );
+    return styles[status] || '';
   };
 
   return (
@@ -298,6 +321,20 @@ const Historial = () => {
                 ))}
               </SelectContent>
             </Select>
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <SelectTrigger className="w-full md:w-40">
+                <Filter className="w-4 h-4 mr-2" />
+                <SelectValue placeholder="Estado" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todos los estados</SelectItem>
+                {statusOptions.map((status) => (
+                  <SelectItem key={status.value} value={status.value}>
+                    {status.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
             <div className="relative w-full md:w-80">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input
@@ -310,6 +347,15 @@ const Historial = () => {
             </div>
           </div>
         </div>
+
+        {/* Indicador de filtro activo */}
+        {advisorFilter !== 'all' && (
+          <div className="mb-4 p-3 bg-primary/5 rounded-lg border border-primary/20">
+            <p className="text-sm text-primary font-medium">
+              📊 Mostrando estadísticas de: <span className="font-bold">{getAdvisorName(advisorFilter)}</span>
+            </p>
+          </div>
+        )}
 
         {filteredQuotations.length === 0 ? (
           <div className="text-center py-12">
@@ -365,7 +411,21 @@ const Historial = () => {
                       {formatCurrency(quotation.total)}
                     </td>
                     <td className="py-3 px-4 text-center">
-                      {getStatusBadge(quotation.status)}
+                      <Select 
+                        value={quotation.status} 
+                        onValueChange={(value) => handleStatusChange(quotation, value as 'draft' | 'sent' | 'approved' | 'rejected')}
+                      >
+                        <SelectTrigger className={`w-32 h-8 text-xs ${getStatusSelectStyles(quotation.status)}`}>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {statusOptions.map((status) => (
+                            <SelectItem key={status.value} value={status.value}>
+                              {status.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </td>
                     <td className="py-3 px-4">
                       <div className="flex items-center justify-center gap-1">
