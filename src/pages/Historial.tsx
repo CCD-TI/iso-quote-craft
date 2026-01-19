@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useMemo } from 'react';
-import { Eye, Trash2, Search, FileText, Download, Edit, Settings, CheckCircle, DollarSign, TrendingUp, Filter } from 'lucide-react';
+import { Eye, Trash2, Search, FileText, Download, Edit, Settings, CheckCircle, TrendingUp, Filter, BarChart3 } from 'lucide-react';
 import Layout from '@/components/layout/Layout';
 import { useApp } from '@/context/AppContext';
 import { useAuth } from '@/context/AuthContext';
@@ -22,6 +22,7 @@ import {
 import DeleteWithCodeDialog from '@/components/ui/DeleteWithCodeDialog';
 import QuotationPreview from '@/components/quotation/QuotationPreview';
 import QuotationEditDialog from '@/components/quotation/QuotationEditDialog';
+import AdvisorPerformanceChart from '@/components/historial/AdvisorPerformanceChart';
 import { Quotation } from '@/types/quotation';
 import { useToast } from '@/hooks/use-toast';
 import {
@@ -37,6 +38,12 @@ const statusOptions = [
   { value: 'approved', label: 'Aprobada' },
   { value: 'rejected', label: 'Rechazada' },
 ];
+
+const SolesIcon = ({ className = '' }: { className?: string }) => (
+  <span className={`inline-flex h-5 w-5 items-center justify-center text-[11px] font-extrabold leading-none ${className}`}>
+    S/.
+  </span>
+);
 
 const Historial = () => {
   const { quotations, deleteQuotation, updateQuotation, advisors } = useApp();
@@ -112,7 +119,7 @@ const Historial = () => {
   }, [quotations, advisorFilter]);
 
   const formatCurrency = (amount: number) => {
-    return `S/ ${amount.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    return `S/. ${amount.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   };
 
   const formatDate = (dateString: string) => {
@@ -252,7 +259,7 @@ const Historial = () => {
         <div className="card-corporate p-4">
           <div className="flex items-center gap-3">
             <div className="p-2 rounded-lg bg-primary/10">
-              <DollarSign className="w-5 h-5 text-primary" />
+              <SolesIcon className="text-primary" />
             </div>
             <div>
               <p className="text-sm text-muted-foreground">Valor Implementación</p>
@@ -289,7 +296,7 @@ const Historial = () => {
         <div className="card-corporate p-4 border-l-4 border-l-primary">
           <div className="flex items-center gap-3">
             <div className="p-2 rounded-lg bg-primary/10">
-              <DollarSign className="w-5 h-5 text-primary" />
+              <SolesIcon className="text-primary" />
             </div>
             <div>
               <p className="text-sm text-muted-foreground">Total Cotizado</p>
@@ -297,6 +304,20 @@ const Historial = () => {
             </div>
           </div>
         </div>
+      </div>
+
+      {/* Gráfico: Cotizado vs Vendido por asesor (S/.) */}
+      <div className="card-corporate mb-6">
+        <div className="flex items-center gap-2 mb-4">
+          <div className="p-2 rounded-lg bg-primary/10">
+            <BarChart3 className="w-5 h-5 text-primary" />
+          </div>
+          <div>
+            <p className="text-sm text-muted-foreground">Rendimiento por asesor</p>
+            <p className="text-lg font-semibold">Total cotizado vs vendido (Aprobadas)</p>
+          </div>
+        </div>
+        <AdvisorPerformanceChart advisors={advisors} quotations={quotations} advisorFilter={advisorFilter} />
       </div>
 
       <div className="card-corporate">
