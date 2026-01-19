@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useMemo } from 'react';
-import { Eye, Trash2, Search, FileText, Download, Edit, Settings } from 'lucide-react';
+import { Eye, Trash2, Search, FileText, Download, Edit, Settings, CheckCircle, DollarSign, TrendingUp } from 'lucide-react';
 import Layout from '@/components/layout/Layout';
 import { useApp } from '@/context/AppContext';
 import { useAuth } from '@/context/AuthContext';
@@ -78,6 +78,19 @@ const Historial = () => {
       withImplementation,
       withoutImplementation: quotations.length - withImplementation,
       totalValue: totalImplementationValue,
+    };
+  }, [quotations]);
+
+  // Estadísticas de cotizaciones aprobadas/vendidas
+  const approvedStats = useMemo(() => {
+    const approvedQuotations = quotations.filter(q => q.status === 'approved');
+    const totalApprovedValue = approvedQuotations.reduce((sum, q) => sum + q.total, 0);
+    const totalQuotedValue = quotations.reduce((sum, q) => sum + q.total, 0);
+    
+    return {
+      count: approvedQuotations.length,
+      totalValue: totalApprovedValue,
+      totalQuotedValue,
     };
   }, [quotations]);
 
@@ -179,7 +192,7 @@ const Historial = () => {
   return (
     <Layout>
       {/* Resumen de Implementación */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
         <div className="card-corporate p-4">
           <div className="flex items-center gap-3">
             <div className="p-2 rounded-lg bg-primary/10">
@@ -216,11 +229,48 @@ const Historial = () => {
         <div className="card-corporate p-4">
           <div className="flex items-center gap-3">
             <div className="p-2 rounded-lg bg-primary/10">
-              <FileText className="w-5 h-5 text-primary" />
+              <DollarSign className="w-5 h-5 text-primary" />
             </div>
             <div>
               <p className="text-sm text-muted-foreground">Valor Implementación</p>
               <p className="text-xl font-bold">{formatCurrency(implementationStats.totalValue)}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Resumen de Cotizaciones Aprobadas/Vendidas */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        <div className="card-corporate p-4 border-l-4 border-l-success">
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-lg bg-success/10">
+              <CheckCircle className="w-5 h-5 text-success" />
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground">Cotizaciones Aprobadas</p>
+              <p className="text-2xl font-bold text-success">{approvedStats.count}</p>
+            </div>
+          </div>
+        </div>
+        <div className="card-corporate p-4 border-l-4 border-l-success">
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-lg bg-success/10">
+              <TrendingUp className="w-5 h-5 text-success" />
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground">Total Vendido (Aprobadas)</p>
+              <p className="text-xl font-bold text-success">{formatCurrency(approvedStats.totalValue)}</p>
+            </div>
+          </div>
+        </div>
+        <div className="card-corporate p-4 border-l-4 border-l-primary">
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-lg bg-primary/10">
+              <DollarSign className="w-5 h-5 text-primary" />
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground">Total Cotizado</p>
+              <p className="text-xl font-bold">{formatCurrency(approvedStats.totalQuotedValue)}</p>
             </div>
           </div>
         </div>
