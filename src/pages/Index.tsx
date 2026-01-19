@@ -61,21 +61,48 @@ const Index = () => {
     quantity: 1,
   });
 
+  // Generate quotation code
+  const generateNewCode = async () => {
+    setIsGeneratingCode(true);
+    try {
+      const code = await getNextQuotationCode(new Date());
+      setQuotationCode(code);
+      setClientData(prev => ({ ...prev, codigo: code }));
+    } catch (error) {
+      console.error('Error generating code:', error);
+    } finally {
+      setIsGeneratingCode(false);
+    }
+  };
+
   // Generate quotation code on mount
   useEffect(() => {
-    const generateCode = async () => {
-      try {
-        const code = await getNextQuotationCode(currentDate);
-        setQuotationCode(code);
-        setClientData(prev => ({ ...prev, codigo: code }));
-      } catch (error) {
-        console.error('Error generating code:', error);
-      } finally {
-        setIsGeneratingCode(false);
-      }
-    };
-    generateCode();
+    generateNewCode();
   }, []);
+
+  // Reset form and generate new code
+  const resetFormAndGenerateNewCode = async () => {
+    setClientData({
+      ruc: '',
+      razonSocial: '',
+      representante: '',
+      celular: '',
+      correo: '',
+      asesorId: advisor?.id || '',
+      fecha: new Date(),
+      codigo: '',
+    });
+    setSelectedISOs([]);
+    setDiscount(0);
+    setIncludeIGV(true);
+    setImplementation({
+      enabled: false,
+      companySize: 'pequeña' as 'pequeña' | 'mediana' | 'grande',
+      unitPrice: 3500,
+      quantity: 1,
+    });
+    await generateNewCode();
+  };
 
   const validateForm = (): boolean => {
     if (!clientData.ruc || clientData.ruc.length !== 11) {
@@ -194,6 +221,9 @@ const Index = () => {
       description: 'La cotización se ha guardado en el historial y descargado como PDF',
     });
     setShowPreview(false);
+    
+    // Reset form and generate new quotation code
+    await resetFormAndGenerateNewCode();
   };
 
   const downloadPdfFromRef = async () => {
@@ -277,6 +307,9 @@ const Index = () => {
           title: 'PDF generado',
           description: 'La cotización se ha guardado y descargado correctamente',
         });
+
+        // Reset form and generate new quotation code
+        await resetFormAndGenerateNewCode();
       } catch (error) {
         toast({
           title: 'Error',
