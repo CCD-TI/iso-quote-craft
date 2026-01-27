@@ -6,6 +6,7 @@ export interface ISOStandard {
   certificationPrice: number;
   followUpPrice: number;
   recertificationPrice: number;
+  displayOrder?: number;
 }
 
 export interface Advisor {

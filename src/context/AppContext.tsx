@@ -22,6 +22,7 @@ interface AppContextType {
   addISOStandard: (iso: ISOStandard) => Promise<void>;
   updateISOStandard: (iso: ISOStandard) => Promise<void>;
   deleteISOStandard: (id: string) => Promise<void>;
+  reorderISOStandards: (standards: ISOStandard[]) => Promise<void>;
   addAdvisor: (advisor: Advisor) => Promise<void>;
   updateAdvisor: (advisor: Advisor) => Promise<void>;
   deleteAdvisor: (id: string) => Promise<void>;
@@ -49,6 +50,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     addISOStandard: addISO,
     updateISOStandard: updateISO,
     deleteISOStandard: deleteISO,
+    reorderISOStandards: reorderISO,
   } = useISOStandards();
 
   const {
@@ -102,6 +104,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const deleteISOStandard = async (id: string) => {
     await deleteISO(id);
+  };
+
+  const reorderISOStandards = async (standards: ISOStandard[]) => {
+    await reorderISO(standards);
   };
 
   const addAdvisor = async (advisor: Advisor) => {
@@ -176,6 +182,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         addISOStandard,
         updateISOStandard,
         deleteISOStandard,
+        reorderISOStandards,
         addAdvisor,
         updateAdvisor,
         deleteAdvisor,
