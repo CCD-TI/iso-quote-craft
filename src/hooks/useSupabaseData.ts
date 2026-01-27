@@ -11,6 +11,7 @@ interface DbISOStandard {
   certification_price: number;
   follow_up_price: number;
   recertification_price: number;
+  display_order: number | null;
   created_at: string;
   updated_at: string;
 }
@@ -104,6 +105,7 @@ const mapDbToISOStandard = (db: DbISOStandard): ISOStandard => ({
   certificationPrice: Number(db.certification_price),
   followUpPrice: Number(db.follow_up_price),
   recertificationPrice: Number(db.recertification_price),
+  displayOrder: db.display_order ?? 0,
 });
 
 const mapDbToAdvisor = (db: DbAdvisor): Advisor => ({
@@ -139,7 +141,7 @@ export const useISOStandards = () => {
     const { data, error } = await supabase
       .from('iso_standards')
       .select('*')
-      .order('code');
+      .order('display_order', { ascending: true });
     
     if (error) {
       console.error('Error fetching ISO standards:', error);
@@ -151,6 +153,9 @@ export const useISOStandards = () => {
   };
 
   const addISOStandard = async (iso: Omit<ISOStandard, 'id'>) => {
+    // Get max display_order
+    const maxOrder = isoStandards.reduce((max, item) => Math.max(max, item.displayOrder ?? 0), 0);
+    
     const { data, error } = await supabase
       .from('iso_standards')
       .insert({
@@ -160,6 +165,7 @@ export const useISOStandards = () => {
         certification_price: iso.certificationPrice,
         follow_up_price: iso.followUpPrice,
         recertification_price: iso.recertificationPrice,
+        display_order: maxOrder + 1,
       })
       .select()
       .single();
@@ -183,6 +189,7 @@ export const useISOStandards = () => {
         certification_price: iso.certificationPrice,
         follow_up_price: iso.followUpPrice,
         recertification_price: iso.recertificationPrice,
+        display_order: iso.displayOrder ?? 0,
       })
       .eq('id', iso.id);
     
@@ -192,6 +199,33 @@ export const useISOStandards = () => {
     }
     
     setIsoStandards(prev => prev.map(item => item.id === iso.id ? iso : item));
+  };
+
+  const reorderISOStandards = async (standards: ISOStandard[]) => {
+    // Update all standards with new order
+    const updates = standards.map((iso, index) => ({
+      id: iso.id,
+      display_order: index + 1,
+    }));
+
+    for (const update of updates) {
+      const { error } = await supabase
+        .from('iso_standards')
+        .update({ display_order: update.display_order })
+        .eq('id', update.id);
+      
+      if (error) {
+        console.error('Error reordering ISO standards:', error);
+        throw error;
+      }
+    }
+
+    // Update local state
+    const reorderedStandards = standards.map((iso, index) => ({
+      ...iso,
+      displayOrder: index + 1,
+    }));
+    setIsoStandards(reorderedStandards);
   };
 
   const deleteISOStandard = async (id: string) => {
@@ -212,7 +246,7 @@ export const useISOStandards = () => {
     fetchISOStandards();
   }, []);
 
-  return { isoStandards, setIsoStandards, loading, addISOStandard, updateISOStandard, deleteISOStandard, refetch: fetchISOStandards };
+  return { isoStandards, setIsoStandards, loading, addISOStandard, updateISOStandard, deleteISOStandard, reorderISOStandards, refetch: fetchISOStandards };
 };
 
 // Advisors Hook

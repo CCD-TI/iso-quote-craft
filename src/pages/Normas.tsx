@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { Plus, Pencil, Trash2, Award, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
+import { Plus, Pencil, Trash2, Award, ArrowUpDown, ArrowUp, ArrowDown, ChevronUp, ChevronDown, GripVertical } from 'lucide-react';
 import Layout from '@/components/layout/Layout';
 import { useApp } from '@/context/AppContext';
 import { useModuleStyles } from '@/context/ModuleColorsContext';
@@ -16,18 +16,19 @@ import DeleteWithCodeDialog from '@/components/ui/DeleteWithCodeDialog';
 import { ISOStandard } from '@/types/quotation';
 import { useToast } from '@/hooks/use-toast';
 
-type SortField = 'code' | 'description' | 'certificationPrice' | 'followUpPrice' | 'recertificationPrice';
+type SortField = 'code' | 'description' | 'certificationPrice' | 'followUpPrice' | 'recertificationPrice' | 'displayOrder';
 type SortDirection = 'asc' | 'desc';
 
 const Normas = () => {
-  const { isoStandards, addISOStandard, updateISOStandard, deleteISOStandard } = useApp();
+  const { isoStandards, addISOStandard, updateISOStandard, deleteISOStandard, reorderISOStandards } = useApp();
   const { toast } = useToast();
   const { sectionNumberStyle, tableHeaderStyle, colors } = useModuleStyles('normas');
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingISO, setEditingISO] = useState<ISOStandard | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
-  const [sortField, setSortField] = useState<SortField>('code');
+  const [sortField, setSortField] = useState<SortField>('displayOrder');
   const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
+  const [isReordering, setIsReordering] = useState(false);
 
   const [formData, setFormData] = useState({
     code: '',
@@ -124,6 +125,10 @@ const Normas = () => {
       let bValue: string | number;
 
       switch (sortField) {
+        case 'displayOrder':
+          aValue = a.displayOrder ?? 0;
+          bValue = b.displayOrder ?? 0;
+          break;
         case 'code':
           aValue = a.code.toLowerCase();
           bValue = b.code.toLowerCase();
@@ -145,8 +150,8 @@ const Normas = () => {
           bValue = b.recertificationPrice;
           break;
         default:
-          aValue = a.code.toLowerCase();
-          bValue = b.code.toLowerCase();
+          aValue = a.displayOrder ?? 0;
+          bValue = b.displayOrder ?? 0;
       }
 
       if (aValue < bValue) return sortDirection === 'asc' ? -1 : 1;
@@ -161,6 +166,52 @@ const Normas = () => {
     } else {
       setSortField(field);
       setSortDirection('asc');
+    }
+  };
+
+  const handleMoveUp = async (index: number) => {
+    if (index === 0 || isReordering) return;
+    setIsReordering(true);
+    
+    try {
+      const newOrder = [...sortedISOStandards];
+      [newOrder[index - 1], newOrder[index]] = [newOrder[index], newOrder[index - 1]];
+      await reorderISOStandards(newOrder);
+      toast({
+        title: 'Orden actualizado',
+        description: 'La norma se ha movido hacia arriba',
+      });
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'No se pudo actualizar el orden',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsReordering(false);
+    }
+  };
+
+  const handleMoveDown = async (index: number) => {
+    if (index === sortedISOStandards.length - 1 || isReordering) return;
+    setIsReordering(true);
+    
+    try {
+      const newOrder = [...sortedISOStandards];
+      [newOrder[index], newOrder[index + 1]] = [newOrder[index + 1], newOrder[index]];
+      await reorderISOStandards(newOrder);
+      toast({
+        title: 'Orden actualizado',
+        description: 'La norma se ha movido hacia abajo',
+      });
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'No se pudo actualizar el orden',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsReordering(false);
     }
   };
 
@@ -199,8 +250,13 @@ const Normas = () => {
             <table className="w-full">
               <thead>
                 <tr style={tableHeaderStyle}>
+                  <th className="text-center py-3 px-2 font-semibold rounded-tl-md w-20">
+                    <div className="flex items-center justify-center">
+                      <GripVertical className="w-4 h-4" />
+                    </div>
+                  </th>
                   <th 
-                    className="text-left py-3 px-4 font-semibold rounded-tl-md cursor-pointer hover:bg-opacity-80 select-none"
+                    className="text-left py-3 px-4 font-semibold cursor-pointer hover:bg-opacity-80 select-none"
                     onClick={() => handleSort('code')}
                   >
                     <div className="flex items-center">
@@ -255,6 +311,30 @@ const Normas = () => {
                       index % 2 === 0 ? 'bg-background' : 'bg-muted/30'
                     }`}
                   >
+                    <td className="py-3 px-2">
+                      <div className="flex flex-col items-center gap-0.5">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleMoveUp(index)}
+                          disabled={index === 0 || isReordering || sortField !== 'displayOrder'}
+                          className="h-6 w-6 p-0"
+                          title="Mover arriba"
+                        >
+                          <ChevronUp className="w-4 h-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleMoveDown(index)}
+                          disabled={index === sortedISOStandards.length - 1 || isReordering || sortField !== 'displayOrder'}
+                          className="h-6 w-6 p-0"
+                          title="Mover abajo"
+                        >
+                          <ChevronDown className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </td>
                     <td className="py-3 px-4">
                       <span className="font-semibold text-primary">{iso.code}</span>
                     </td>

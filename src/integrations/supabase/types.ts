@@ -149,6 +149,7 @@ export type Database = {
           code: string
           created_at: string
           description: string | null
+          display_order: number | null
           follow_up_price: number
           id: string
           name: string
@@ -160,6 +161,7 @@ export type Database = {
           code: string
           created_at?: string
           description?: string | null
+          display_order?: number | null
           follow_up_price?: number
           id?: string
           name: string
@@ -171,6 +173,7 @@ export type Database = {
           code?: string
           created_at?: string
           description?: string | null
+          display_order?: number | null
           follow_up_price?: number
           id?: string
           name?: string
