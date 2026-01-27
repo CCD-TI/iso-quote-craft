@@ -108,10 +108,12 @@ const ClientDataForm = ({ data, onChange, moduleColors }: ClientDataFormProps) =
           <input
             type="tel"
             value={data.celular}
-            onChange={(e) => handleChange('celular', e.target.value.replace(/\s/g, ''))}
+            onChange={(e) => {
+              const cleanValue = e.target.value.replace(/\s/g, '').slice(0, 9);
+              handleChange('celular', cleanValue);
+            }}
             className="input-corporate"
             placeholder="Ingrese celular"
-            maxLength={9}
           />
         </div>
 
