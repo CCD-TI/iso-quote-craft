@@ -111,7 +111,7 @@ const ClientDataForm = ({ data, onChange, moduleColors }: ClientDataFormProps) =
             onChange={(e) => handleChange('celular', e.target.value)}
             className="input-corporate"
             placeholder="Ingrese celular"
-            maxLength={9}
+            maxLength={15}
           />
         </div>
 
