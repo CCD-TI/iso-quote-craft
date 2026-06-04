@@ -22,7 +22,9 @@ interface DbAdvisor {
   email: string | null;
   phone: string | null;
   username: string | null;
-  password_hash: string | null;
+  password_hash?: string | null;
+  is_admin?: boolean;
+
   created_at: string;
   updated_at: string;
 }
