@@ -257,17 +257,19 @@ export const useAdvisors = () => {
   const fetchAdvisors = async () => {
     const { data, error } = await supabase
       .from('advisors')
-      .select('*')
+      .select('id, name, email, phone, username, is_admin, created_at, updated_at')
       .order('name');
     
     if (error) {
       console.error('Error fetching advisors:', error);
+      setLoading(false);
       return;
     }
     
     setAdvisors((data as DbAdvisor[]).map(mapDbToAdvisor));
     setLoading(false);
   };
+
 
   const addAdvisor = async (advisor: Omit<Advisor, 'id'>) => {
     const { data, error } = await supabase
