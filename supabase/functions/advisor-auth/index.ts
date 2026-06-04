@@ -68,7 +68,9 @@ Deno.serve(async (req) => {
 
       // Verify password
       const hashedInput = await hashPassword(password);
-      if (hashedInput !== advisor.password_hash) {
+      const trimmedPassword = password.trim();
+      const hashedTrimmedInput = trimmedPassword === password ? hashedInput : await hashPassword(trimmedPassword);
+      if (hashedInput !== advisor.password_hash && hashedTrimmedInput !== advisor.password_hash) {
         return new Response(
           JSON.stringify({ success: false, message: 'Contraseña incorrecta' }),
           { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
