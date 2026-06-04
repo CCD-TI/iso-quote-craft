@@ -55,14 +55,14 @@ Deno.serve(async (req) => {
       if (!advisor) {
         return new Response(
           JSON.stringify({ success: false, message: 'Usuario no encontrado' }),
-          { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }
 
       if (!advisor.password_hash) {
         return new Response(
           JSON.stringify({ success: false, message: 'Este usuario no tiene contraseña configurada' }),
-          { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }
 
@@ -73,7 +73,7 @@ Deno.serve(async (req) => {
       if (hashedInput !== advisor.password_hash && hashedTrimmedInput !== advisor.password_hash) {
         return new Response(
           JSON.stringify({ success: false, message: 'Contraseña incorrecta' }),
-          { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }
 
