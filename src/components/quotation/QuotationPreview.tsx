@@ -101,7 +101,7 @@ const QuotationPreview = forwardRef<HTMLDivElement, QuotationPreviewProps>(
         />
 
         {/* Content */}
-        <div className="relative z-10 p-8">
+        <div className="relative z-10 px-6 py-4">
           {/* Header with Logos and Info */}
           <div className="flex justify-between items-start mb-2">
             {/* Left - Logos side by side */}
