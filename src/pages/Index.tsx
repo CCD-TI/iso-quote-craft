@@ -321,7 +321,7 @@ const Index = () => {
     }, 300);
   };
 
-  if (appLoading || isGeneratingCode) {
+  if (appLoading) {
     return (
       <Layout>
         <div className="flex items-center justify-center h-64">
