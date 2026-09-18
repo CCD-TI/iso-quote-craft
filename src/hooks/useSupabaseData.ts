@@ -527,35 +527,23 @@ export const useQuotations = () => {
   const [loading, setLoading] = useState(true);
 
   const fetchQuotations = async () => {
+    // Single request: quotations + their ISOs embedded, limited to the most
+    // recent records so the history stays fast as the table grows.
     const { data: quotationsData, error: quotationsError } = await supabase
       .from('quotations')
-      .select('*')
-      .order('created_at', { ascending: false });
-    
+      .select('*, quotation_isos(*)')
+      .order('created_at', { ascending: false })
+      .limit(500);
+
     if (quotationsError) {
       console.error('Error fetching quotations:', quotationsError);
       setLoading(false);
       return;
     }
 
-    const quotationIds = (quotationsData as DbQuotation[]).map(q => q.id);
-
-    // Fetch all ISOs in a single query (avoids one request per quotation)
-    let allIsos: DbQuotationISO[] = [];
-    if (quotationIds.length > 0) {
-      const { data: isosData, error: isosError } = await supabase
-        .from('quotation_isos')
-        .select('*')
-        .in('quotation_id', quotationIds);
-      if (isosError) console.error('Error fetching quotation isos:', isosError);
-      allIsos = (isosData || []) as DbQuotationISO[];
-    }
-
     const isosByQuotation = new Map<string, DbQuotationISO[]>();
-    for (const iso of allIsos) {
-      const list = isosByQuotation.get(iso.quotation_id) || [];
-      list.push(iso);
-      isosByQuotation.set(iso.quotation_id, list);
+    for (const q of (quotationsData || []) as (DbQuotation & { quotation_isos?: DbQuotationISO[] })[]) {
+      isosByQuotation.set(q.id, (q.quotation_isos || []) as DbQuotationISO[]);
     }
 
     const quotationsWithISOs: Quotation[] = [];
