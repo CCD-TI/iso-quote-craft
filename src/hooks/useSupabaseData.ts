@@ -766,11 +766,12 @@ export const useQuotations = () => {
     const { data } = await supabase
       .from('quotations')
       .select('code')
-      .like('code', `${prefix}%`);
+      .like('code', `${prefix}%`)
+      .order('code', { ascending: false })
+      .limit(1);
     
-    const existingCodes = (data || [])
-      .map(q => parseInt(q.code.split('-').pop() || '0', 10));
-    const nextNumber = existingCodes.length > 0 ? Math.max(...existingCodes) + 1 : 1;
+    const lastCode = data?.[0]?.code;
+    const nextNumber = lastCode ? parseInt(lastCode.split('-').pop() || '0', 10) + 1 : 1;
     
     return `${prefix}${nextNumber.toString().padStart(5, '0')}`;
   };
