@@ -534,19 +534,34 @@ export const useQuotations = () => {
     
     if (quotationsError) {
       console.error('Error fetching quotations:', quotationsError);
+      setLoading(false);
       return;
     }
 
-    // Fetch ISOs for each quotation
+    const quotationIds = (quotationsData as DbQuotation[]).map(q => q.id);
+
+    // Fetch all ISOs in a single query (avoids one request per quotation)
+    let allIsos: DbQuotationISO[] = [];
+    if (quotationIds.length > 0) {
+      const { data: isosData, error: isosError } = await supabase
+        .from('quotation_isos')
+        .select('*')
+        .in('quotation_id', quotationIds);
+      if (isosError) console.error('Error fetching quotation isos:', isosError);
+      allIsos = (isosData || []) as DbQuotationISO[];
+    }
+
+    const isosByQuotation = new Map<string, DbQuotationISO[]>();
+    for (const iso of allIsos) {
+      const list = isosByQuotation.get(iso.quotation_id) || [];
+      list.push(iso);
+      isosByQuotation.set(iso.quotation_id, list);
+    }
+
     const quotationsWithISOs: Quotation[] = [];
     
     for (const q of quotationsData as DbQuotation[]) {
-      const { data: isosData } = await supabase
-        .from('quotation_isos')
-        .select('*')
-        .eq('quotation_id', q.id);
-      
-      const selectedISOs: SelectedISO[] = ((isosData || []) as DbQuotationISO[]).map(iso => ({
+      const selectedISOs: SelectedISO[] = (isosByQuotation.get(q.id) || []).map(iso => ({
         isoId: iso.iso_id,
         certification: iso.certification,
         certificationPrice: Number(iso.certification_price),
