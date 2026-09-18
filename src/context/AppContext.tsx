@@ -38,6 +38,7 @@ interface AppContextType {
   deleteCertificationStep: (id: string) => Promise<void>;
   reorderCertificationSteps: (steps: CertificationStep[]) => Promise<void>;
   loading: boolean;
+  quotationsLoading: boolean;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -91,7 +92,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     getNextQuotationCode: getNextCode,
   } = useQuotations();
 
-  const loading = isoLoading || advisorsLoading || banksLoading || stepsLoading || quotationsLoading;
+  // Quotation history is not needed to render most screens, so it loads in the
+  // background instead of blocking the UI.
+  const loading = isoLoading || advisorsLoading || banksLoading || stepsLoading;
 
   // Wrapper functions to match expected interface
   const addISOStandard = async (iso: ISOStandard) => {
@@ -198,6 +201,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         deleteCertificationStep,
         reorderCertificationSteps,
         loading,
+        quotationsLoading,
       }}
     >
       {children}
