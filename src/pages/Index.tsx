@@ -105,6 +105,13 @@ const Index = () => {
   };
 
   const validateForm = (): boolean => {
+    if (!clientData.codigo) {
+      toast({
+        title: 'Un momento',
+        description: 'Se está generando el código de la cotización',
+      });
+      return false;
+    }
     if (!clientData.ruc || clientData.ruc.length !== 11) {
       toast({
         title: 'Error de validación',
@@ -321,7 +328,7 @@ const Index = () => {
     }, 300);
   };
 
-  if (appLoading || isGeneratingCode) {
+  if (appLoading) {
     return (
       <Layout>
         <div className="flex items-center justify-center h-64">

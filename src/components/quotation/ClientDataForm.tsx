@@ -172,6 +172,7 @@ const ClientDataForm = ({ data, onChange, moduleColors }: ClientDataFormProps) =
             type="text"
             value={data.codigo}
             className="input-corporate"
+            placeholder="Generando código..."
             readOnly
           />
         </div>
