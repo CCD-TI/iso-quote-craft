@@ -527,13 +527,13 @@ export const useQuotations = () => {
   const [loading, setLoading] = useState(true);
 
   const fetchQuotations = async () => {
-    // Single request: quotations + their ISOs embedded, limited to the most
-    // recent records so the history stays fast as the table grows.
+    // Single request: quotations + their ISOs embedded. Only the 2 most
+    // recent records are loaded to keep the generator opening instantly.
     const { data: quotationsData, error: quotationsError } = await supabase
       .from('quotations')
       .select('*, quotation_isos(*)')
       .order('created_at', { ascending: false })
-      .limit(500);
+      .limit(2);
 
     if (quotationsError) {
       console.error('Error fetching quotations:', quotationsError);
